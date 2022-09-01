@@ -1,0 +1,19 @@
+{
+  "name": "texteditor-frontend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Asa-Hog/BTH-jsramverk-frontend.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Asa-Hog/BTH-jsramverk-frontend/issues"
+  },
+  "homepage": "https://github.com/Asa-Hog/BTH-jsramverk-frontend#readme"
+}

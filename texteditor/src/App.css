@@ -36,3 +36,39 @@
     transform: rotate(360deg);
   }
 }
+/* Eget under */
+/* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
+body {
+  background-color: whitesmoke;
+  /* background-color: lightblue; */
+}
+
+.header {
+  display: flex;
+  justify-content: center;
+}
+
+.editor {
+  /* min-height: 200px; */
+  /* border: 1px solid black; */
+  margin-top: 0px;
+}
+
+.trix-editor {
+  /* width: 50rem; */
+  /* border-top: 1px solid black; */
+  /* width: 800px;  */
+  /* width: 500px; */
+  min-height: 300px;
+  margin: 0 auto;
+  background-color: white;
+}
+
+
+trix-toolbar {
+    background-color: #61dafb;
+}
+
+button {
+  margin: 10px;
+}

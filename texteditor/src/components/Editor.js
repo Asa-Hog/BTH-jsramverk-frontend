@@ -1,18 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 // import ReactHtmlParser from 'react-html-parser';
 import { TrixEditor } from "react-trix";
-
 // import "trix";
 import "trix/dist/trix.css";
+// import saveForm from './saveForm';
 
-import docsModel from '../models/docs';
+import docsModel from '../models/docsModel';
 
 const Editor = () => {
     let [data, setData] = useState('');
     const [docs, setDocs] = useState([]);
     const [currentDoc, setCurrentDoc] = useState({});
-    // const trixRef = useRef(null);
-    // const myRef = React.createRef();
+    const [title, setTitle] = useState('');
 
     useEffect(() => {
         (async () => {
@@ -21,67 +20,86 @@ const Editor = () => {
         })();
     }, [currentDoc]);
 
-    let fetchDoc = () => {
-        // console.log("hämta valt dokument och visa det i editorn");
-        // console.log("och spara det i currentDoc??");
-        // var docId = document.getElementById("selectDoc").value;
-        // console.log(docs[docId]);
-        // Skriv ut i editorn - UPPDATERA DATA I EDITORN AUTOMATISKT
+    // const printData = () => { 
+    //     // console.log("skriv ut i konsollen");
+    //     // if (ReactHtmlParser(data)[0].props !== undefined) {
+    //     //     console.log( ReactHtmlParser(data)[0].props.children ); // ger en array med objekt i
+    //     // }
+    //     // for (let row in  ReactHtmlParser(data)[0].props.children[row]) {
+    //         // \filtrera ut element (br mm ?
+    //     //     console.log(row);
+    //     // }
+    //     if (data !== undefined) {
+    //         console.log(data);
+    //     };
+    // };
 
+    let handleSelectedDoc = () => {
         // Hämta värde ur selectlista
         let selectedDocId = document.getElementById("selectDoc").value;
-        let chosenDoc = docs[selectedDocId];
-        console.log("Chosen doc", chosenDoc);
-        // editor = chosenDoc.html;
+        let selectedDoc = docs[selectedDocId];
 
-        // Från början är currentDoc {} och data ""
+        setCurrentDoc(selectedDoc);
+        console.log(selectedDoc);
 
-        // setCurrentDoc(chosenDoc); // Sätter currentDoc till valt dokument
-        setCurrentDoc(chosenDoc);
-        console.log("Current doc: ", currentDoc);
+        if (selectedDoc !== undefined) {
+            setEditorContent(selectedDoc);
+        }
+     };
 
-        setData(chosenDoc.html);
-        console.log("data: ", data); // Sätter data till valt dokuments data
- 
-        // setCurrentDoc(chosenDoc); // när jag sätter detta uppdateras sidan
-        // - då blir currentDoc {} igen - NEJ, har ju precis ändrat värdet. Sidan uppdateras bara
-    }
+    // console.log(event); // hela html
+    // console.log(event.target); // De använde event.target.value
+    // function setEditorContent(content, triggerChange) {
+    function setEditorContent(selectedDoc) {
+        let element = document.querySelector("trix-editor");
+        // let element = document.getElementById("selectDoc"); // element.editor is undefined med denna, men ej ovanstående element som är samma sak
+            element.value = "";
+            // element.editor.setSelectedRange([0, 0]);
+            element.editor.insertHTML(selectedDoc.html);
+        // selectedDoc.innerHTML = "hej";
+};
 
-    const printData = () => { 
-        // console.log("skriv ut i konsollen");
-        // if (ReactHtmlParser(data)[0].props !== undefined) {
-        //     console.log( ReactHtmlParser(data)[0].props.children ); // ger en array med objekt i
-        // }
-        // for (let row in  ReactHtmlParser(data)[0].props.children[row]) {
-            // \filtrera ut element (br mm ?
-        //     console.log(row);
-        // }
-        if (data !== undefined) {
-            console.log(data);
-        };
+    const resetDb = async () => {
+        await docsModel.reset();
     };
 
-    const createObject = async () => {
-        // doc = {_id: 123456, name: "hej", html: data};
-        // öppna ett formulär där man får fylla i namn? / 
-        // inte ha med namn när dokument skapas utan ta med det när man vill spara sen? 
-        //??????????????????????????????????????????????? name = ?????????
-        // Objektet får ett id som response efter detta
-        let doc = {html: data};
-        await docsModel.create(doc);
+    const setName = (event) => {
+        // console.log(event.target.value);
+        setTitle(event.target.value);
+    };
+
+    const showSaveForm = () => {
+        // Visa formuläret med CSS
+        document.getElementById("saveForm").style.display = "block";
+
+    };
+
+    const createObject = async (event) => {
+        event.preventDefault();
+        let newDoc = {};
+        newDoc.html = data;
+        // console.log("Hämta namn");
+        // let docName = document.getElementById("saveForm").value;
+        // let docName = document.querySelector("saveForm").value; // document.querySelector(...) is null
+        // console.log(docName); //undefined
+
+        newDoc.name = title;
+        // console.log("newDoc", newDoc);
+        await docsModel.create(newDoc);
     };
 
     const updateObject = async () => { 
-        // VILKET ID VILL VI UPPDATERA -
-        // OBJEKTET SOM VALTS I SELECTLISTAN - FETCHOBJECT
-        let doc = {html: data};
-        // let doc = {html: "EJ UNDEF DATA"};
-        await docsModel.update(doc);
+        if (currentDoc == undefined) {
+            alert("Please choose a file to update");
+        } else {
+            currentDoc.html = data; // Ändrar html för currentDoc till det som står i editorn
+            await docsModel.update(currentDoc);
+        }
     };
 
-    const saveObject = () => { 
-        console.log( "spara objekt" );
-    };
+    // const saveObject = () => { 
+    //     console.log( "spara objekt" );
+    // };
 
     // let handleEditor = (e, editor) => { 
     //     // setData(editor.getData());
@@ -94,56 +112,48 @@ const Editor = () => {
     //     editor.insertString("editor is ready");
     //   };
 
-
-    let onChange = (event, newValue) => { 
-        // console.log(event); // hela html
-        // console.log(event.target); // De använde event.target.value
-        // console.log(newValue);
-        // setData(newValue);
+    let setEditorData = (event) => { 
         setData(event);
-    }
-
-    let onEditorReady = (event, editor) => {
-        console.log("behövs?");
-        // console.log("hej", editor);
-        // trixRef.innerHTML = data;
-        // return;
-    }
+    };
 
     return (
         <div className = "editor">
-            {/* <h1> Text editor </h1> */}
 
             <trix-toolbar id = "trix-toolbar">
 
+                <button className = "button" onClick = {()=> resetDb() }> Reset </button>
+                <button className = "button" onClick = {(event)=> showSaveForm(event) }> Create new </button>
 
-                <button onClick = {()=> printData() }> Save </button>
-                {/* <select id = "selectDoc" onChange = { fetchDoc }>
+                <select id = "selectDoc" onChange = { handleSelectedDoc } >
                     <option value = "-99" key = "0"> Choose a document </option>
                     {docs.map((doc, index) => <option value = {index} key = {index}> {doc.name} </option>)}
-                </select> */}
+                </select>
 
-                {/* <button onClick = {()=> createObject() }> Create </button> */}
-                {/* <button onClick = {()=> updateObject() }> Update </button> */}
-                {/* <button onClick = {()=> saveObject() }> Save </button> */}
-
+                <button className = "button" onClick = {()=> updateObject() }> Update </button>
             </trix-toolbar>
+
+        {/* <saveForm /> */}
+        <form className = "saveForm" id = "saveForm" onSubmit = { (event) => { createObject(event);} } style = {{display: "none"}}>Name of file:
+                <input className = "button" id = "fileName" type = "text" value = { title } onChange = { (event) => { setName(event); } }    > 
+                </input>
+
+                <input className = "button" type = "submit" value = "Save"></input>
+            </form>
 
 
             <TrixEditor id = "trixEditorContent" className = "trix-editor" toolbar = "trix-toolbar"
                 // editor = {TrixEditor}
-                // onEditorReady = { onEditorReady }
                 // onEditorReady = {(event, editor) => {onEditorReady(event, editor) }}
-                // onChange = {(event, editor) => {onChange(event, editor) }}
-                onChange = { onChange } 
-                // ref = { trixRef }
-                value = { data }
+                onChange = { setEditorData } 
+                // onChange={props.change}
+                // value = { data }
                 // input = 'react-trix-editor'
-            >
-                { data }
-
-            </TrixEditor>
+                // autoFocus={true}
+                // default={props.default}
+            />
         </div>
+
+
     )
 }
 

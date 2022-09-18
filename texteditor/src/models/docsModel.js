@@ -2,7 +2,7 @@ const docsModel = {
 
     baseUrl: window.location.href.includes("localhost") ? 
         "http://localhost:1337" :
-        "https://bth-jsramverk-editor-asho20.azurewebsites.net", //driftsatt i AJo, det zure
+        "https://bth-jsramverk-editor-asho20.azurewebsites.net", //driftsatt i Azure
 
 
     reset: async function reset() {

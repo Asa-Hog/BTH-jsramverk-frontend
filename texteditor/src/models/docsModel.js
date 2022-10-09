@@ -34,7 +34,7 @@ const docsModel = {
         );
 
         const result = await response.json();
-        console.log("frontend docsmodel result", result);
+        // console.log("frontend docsmodel result create", result);
         return result.data;
     },
 
@@ -51,7 +51,7 @@ const docsModel = {
         );
 
         const result = await response.json();
-        console.log("frontend docsmodel result", result);
+        // console.log("frontend docsmodel result update", result);
         return result;
     }
 };

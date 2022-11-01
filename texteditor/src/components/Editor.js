@@ -28,7 +28,7 @@ const Editor = () => {
 
     // Skapa en socket mellan frontend och backend - om selectedDoc ändras - till nya dokumentet
     useEffect(() => {
-        setSocket(io("http://localhost:1337")); // Ändra från hårdkodat
+        setSocket(io(docsModel.baseUrl));
         if (socket) {
             console.log("create room", selectedDoc);
             socket.emit("create", selectedDoc);

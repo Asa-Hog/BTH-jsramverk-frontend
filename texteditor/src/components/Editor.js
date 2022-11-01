@@ -145,7 +145,7 @@ const Editor = () => {
         } else {
             console.log(currentDoc);
             // console.log(data);
-            // currentDoc.html = data; // Ändrar html för currentDoc till det som står i editorn
+            // currentDoc.html = data;
             await docsModel.update(currentDoc);
         }
     };

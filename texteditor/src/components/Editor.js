@@ -140,6 +140,10 @@ const Editor = () => {
         document.getElementById("saveForm").style.display = "none";
     };
 
+    const logout = () => {
+        window.location.reload();
+    };
+
     const createObject = async (event) => {
         event.preventDefault();
         let newDoc = {};
@@ -152,6 +156,7 @@ const Editor = () => {
 
         console.log(currentUser);
         newDoc.owner = currentUser;
+        newDoc.allowedUsers = [currentUser];
 
         await docsModel.create(newDoc);
         hideSaveForm();
@@ -182,13 +187,18 @@ const Editor = () => {
                 <select id = "selectDoc" onChange = { handleSelectedDoc } >
                     <option value = "-99" key = "0"> Choose a document </option>
                     {docs.map((doc, index) => <option value = {index} key = {index}> {doc.name} </option>)}
+
+
+                    {/* <option value = "-99" key = "0"> Choose a document </option>
+                    {docs.filter(doc) => doc.owner.includes(currentUser)} */}
                 </select>
                 </>
                 :
-                <div>"Docs not found"</div>
+                <h2>"Docs not found"</h2>
                 }
 
                 <button className = "button" onClick = {()=> updateObject() }> Update </button>
+                <button className = "button" onClick = {()=> logout() }> Logout </button>
             </trix-toolbar>
 
             <form className = "saveForm" id = "saveForm" onSubmit = { (event) => { createObject(event);} } style = {{display: "none"}}>Name of file:

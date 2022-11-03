@@ -5,6 +5,10 @@ import { io } from "socket.io-client";
 // import ReactHtmlParser from 'react-html-parser';
 // import "trix";
 import docsModel from '../models/docsModel';
+import authModel from '../models/auth';
+// import Login from "./components/Login";
+import Login from "./Login";
+
 
 let sendToSocket = true;
 
@@ -16,14 +20,21 @@ const Editor = () => {
     const [currentDoc, setCurrentDoc] = useState({});
     const [selectedDoc, setSelectedDoc] = useState({}); // id på valt objekt
     const [socket, setSocket] = useState(null);
+    const [token, setToken] = useState("");
 
-    // // Hämta alla dokument
+    // async function fetchDocs() {
+    //     const allDocs = await docsModel.getAllDocs();
+
+    //     setDocs(allDocs);
+    // }
+
+    // Hämta alla dokument
     useEffect(() => {
         (async () => {
-            const allDocs = await docsModel.getAllDocs();
+            const allDocs = await docsModel.getAllDocs(token);
             setDocs(allDocs);
         })();
-    }, [currentDoc]); //Laddas om när currentDoc ändras (Om man vill hämta dok från andra browsers?)
+    }, [currentDoc, token]); //Laddas om när currentDoc ändras (Om man vill hämta dok från andra browsers?)
 
 
     // Skapa en socket mellan frontend och backend - om selectedDoc ändras - till nya dokumentet
@@ -75,11 +86,17 @@ const Editor = () => {
     function setEditorContent(content, triggerChange) {
         let element = document.querySelector("trix-editor");
 
-        updateCurrentDocOnChange = triggerChange;
-        element.value = "";
-        element.editor.setSelectedRange([0, 0]); //
-        updateCurrentDocOnChange = triggerChange;
-        element.editor.insertHTML(content);
+        if (element) {
+
+            updateCurrentDocOnChange = triggerChange;
+            element.value = "";
+            element.editor.setSelectedRange([0, 0]); //
+            updateCurrentDocOnChange = triggerChange;
+            element.editor.insertHTML(content);
+
+        }
+
+
     };
 
     function handleChange (html, text) { // html = event
@@ -143,9 +160,9 @@ const Editor = () => {
         if (currentDoc === undefined) {
             alert("Please choose a file to update");
         } else {
-            console.log(currentDoc);
+            // console.log(currentDoc);
             // console.log(data);
-            // currentDoc.html = data;
+            currentDoc.html = data;
             await docsModel.update(currentDoc);
         }
     };
@@ -153,15 +170,23 @@ const Editor = () => {
     return (
         <div className = "editor">
 
+            { token ?
+            <>
             <trix-toolbar id = "trix-toolbar">
 
                 <button className = "button" onClick = {()=> resetDb() }> Reset </button>
                 <button className = "button" onClick = {(event)=> showSaveForm(event) }> Create new </button>
 
+                { docs ?
+                    <>
                 <select id = "selectDoc" onChange = { handleSelectedDoc } >
                     <option value = "-99" key = "0"> Choose a document </option>
                     {docs.map((doc, index) => <option value = {index} key = {index}> {doc.name} </option>)}
                 </select>
+                </>
+                :
+                <div>"Docs not found"</div>
+                }
 
                 <button className = "button" onClick = {()=> updateObject() }> Update </button>
             </trix-toolbar>
@@ -175,12 +200,13 @@ const Editor = () => {
 
             <TrixEditor id = "trixEditorContent" className = "trix-editor" toolbar = "trix-toolbar"
                 onChange = { handleChange }
-                // onChange={props.change}
-                // value = { data }
-                // input = 'react-trix-editor'
-                // autoFocus={true}
-                // default={props.default}
+                // onChange={props.change} // value = { data } // input = 'react-trix-editor'
+                // autoFocus={true} // default={props.default}
             />
+            </>
+             : 
+            <Login setToken={setToken}/>
+    } 
         </div>
     )
 }

@@ -13,8 +13,14 @@ const docsModel = {
         return result.data;
     },
 
-    getAllDocs: async function getAllDocs() {
-        const response = await fetch(`${docsModel.baseUrl}/docs`);
+    getAllDocs: async function getAllDocs(token) {
+        const response = await fetch(`${docsModel.baseUrl}/docs`
+        , {
+            headers: {
+                "x-access-token": token
+            }
+        }
+        );
 
         const result = await response.json();
 

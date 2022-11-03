@@ -1,8 +1,9 @@
 import { useState } from "react";
 import authModel from "../models/auth"
 
-export default function Login({setToken}) {
+export default function Login({setToken, setCurrentUser}) {
     const [user, setUser] = useState({});
+
 
     function changeHandler(event) {
         let newObject = {};
@@ -10,11 +11,15 @@ export default function Login({setToken}) {
         newObject[event.target.name] = event.target.value;
 
         setUser({...user, ...newObject});
+        // console.log(user);
+        setCurrentUser(user.email);
+        // console.log("currentUser satt till ", user); // Sista siffran i pwd saknas...?
     }
 
 
     async function register() {
         await authModel.register(user);
+        alert("User successfully registered");
     }
 
     async function login() {

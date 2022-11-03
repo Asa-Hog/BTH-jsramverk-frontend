@@ -24,8 +24,18 @@ const auth = {
         // }
     },
 
-    register: async function register() {
+    register: async function register(user) {
+        const response = await fetch(`${baseUrl}/auth/register`, {
+            method: "POST",
+            body: JSON.stringify(user),
+            headers: {
+                "content-type": "application/json"
+            }
+        });
 
+        const result = await response.json();
+
+        return result;
     },
 };
 

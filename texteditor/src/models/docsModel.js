@@ -5,6 +5,15 @@ const docsModel = {
         "https://bth-jsramverk-editor-asho20.azurewebsites.net", //driftsatt i Azure
 
 
+    getCurrentUser: function getCurrentUser() {
+        const res = fetch(`${docsModel.baseUrl}/auth/currentUser`);
+
+        // const result = response.json();
+
+        return res.data;
+    },
+
+
     reset: async function reset() {
         const response = await fetch(`${docsModel.baseUrl}/reset`);
 

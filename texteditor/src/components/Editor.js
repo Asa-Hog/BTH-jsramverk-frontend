@@ -5,7 +5,7 @@ import { io } from "socket.io-client";
 // import ReactHtmlParser from 'react-html-parser';
 // import "trix";
 import docsModel from '../models/docsModel';
-import authModel from '../models/auth';
+// import authModel from '../models/auth';
 // import Login from "./components/Login";
 import Login from "./Login";
 
@@ -21,12 +21,7 @@ const Editor = () => {
     const [selectedDoc, setSelectedDoc] = useState({}); // id på valt objekt
     const [socket, setSocket] = useState(null);
     const [token, setToken] = useState("");
-
-    // async function fetchDocs() {
-    //     const allDocs = await docsModel.getAllDocs();
-
-    //     setDocs(allDocs);
-    // }
+    const [currentUser, setCurrentUser] = useState("");
 
     // Hämta alla dokument
     useEffect(() => {
@@ -36,12 +31,11 @@ const Editor = () => {
         })();
     }, [currentDoc, token]); //Laddas om när currentDoc ändras (Om man vill hämta dok från andra browsers?)
 
-
     // Skapa en socket mellan frontend och backend - om selectedDoc ändras - till nya dokumentet
     useEffect(() => {
         setSocket(io(docsModel.baseUrl));
         if (socket) {
-            console.log("create room", selectedDoc);
+            // console.log("create room", selectedDoc);
             socket.emit("create", selectedDoc);
         }
 
@@ -53,19 +47,17 @@ const Editor = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedDoc]);
 
-
     // Skriver ut innehållet i editorn när data ändras
     useEffect(() => {
         setEditorContent(data, false);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data]);
 
-
     // Varje gång det ändras i en socket
     useEffect(() => {
         if (socket) {
             socket.on('changedText', (doc) => {
-                console.log("3 received in clients", doc);
+                // console.log("3 received in clients", doc);
                 sendToSocket = false;
                 setEditorContent(doc.html, false);
             });
@@ -75,28 +67,23 @@ const Editor = () => {
 
     useEffect(() => {
         if (socket && sendToSocket) {
-            console.log("1 emit from client", currentDoc);
+            // console.log("1 emit from client", currentDoc);
             socket.emit("changedText", currentDoc);
         }
         sendToSocket = true;
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentDoc]); // Gör en emit om INNEHÅLLET i currentDoc ändras
 
-
     function setEditorContent(content, triggerChange) {
         let element = document.querySelector("trix-editor");
 
         if (element) {
-
             updateCurrentDocOnChange = triggerChange;
             element.value = "";
             element.editor.setSelectedRange([0, 0]); //
             updateCurrentDocOnChange = triggerChange;
             element.editor.insertHTML(content);
-
         }
-
-
     };
 
     function handleChange (html, text) { // html = event
@@ -148,22 +135,35 @@ const Editor = () => {
         document.getElementById("saveForm").style.display = "block";
     };
 
+    const hideSaveForm = () => {
+        // Dölj formuläret med CSS
+        document.getElementById("saveForm").style.display = "none";
+    };
+
     const createObject = async (event) => {
         event.preventDefault();
         let newDoc = {};
-        newDoc.html = data;
+        // console.log(currentDoc);
+        // console.log(data);
+
+        // newDoc.html = data;
+        newDoc.html = currentDoc.html;
         newDoc.name = name;
+
+        console.log(currentUser);
+        newDoc.owner = currentUser;
+
         await docsModel.create(newDoc);
+        hideSaveForm();
+        console.log("nytt dokument sparat", newDoc);
     };
 
     const updateObject = async () => { 
         if (currentDoc === undefined) {
             alert("Please choose a file to update");
         } else {
-            // console.log(currentDoc);
-            // console.log(data);
-            currentDoc.html = data;
             await docsModel.update(currentDoc);
+            console.log("dok nu uppdaterat");
         }
     };
 
@@ -205,7 +205,7 @@ const Editor = () => {
             />
             </>
              : 
-            <Login setToken={setToken}/>
+            <Login setToken={setToken} setCurrentUser={setCurrentUser}/>
     } 
         </div>
     )

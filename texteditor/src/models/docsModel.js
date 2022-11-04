@@ -68,6 +68,24 @@ const docsModel = {
         const result = await response.json();
         // console.log("frontend docsmodel result update", result);
         return result;
+    },
+
+    addUser: async function addUser(doc, email) {
+        let data = {doc: doc,
+             email:email};
+
+        const response = await fetch(`${docsModel.baseUrl}/addUser`,
+            { 
+                method: "PUT",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(data)
+            }
+        );
+
+        const result = await response.json();
+        console.log(result);
+
+        return result;
     }
 };
 

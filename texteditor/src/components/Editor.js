@@ -39,6 +39,10 @@ const Editor = () => {
             socket.emit("create", selectedDoc);
         }
 
+        if (document.getElementById("addEditorButton")) {
+            showAddEditorButton();
+        }
+
         return () => {
             if (socket) {
                 socket.disconnect();
@@ -140,6 +144,43 @@ const Editor = () => {
         document.getElementById("saveForm").style.display = "none";
     };
 
+    
+    function showAddEditorButton() {
+        // Visa knappen med CSS
+        document.getElementById("addEditorButton").style.display = "inline-block";
+    }
+
+    async function addEditor() {
+        let email = prompt("Enter email of user allowed to edit document: ");
+        // Spara email i databasen för det dokumentet - allowed editors
+        // console.log("cd", currentDoc);
+
+        // if (currentDoc === undefined) {
+            // alert("FEL");
+        // } else {
+            await docsModel.addUser(currentDoc, email);
+            // console.log("dok nu uppdaterat");
+        // }
+
+
+        // hideAddEditorsButton()
+    };
+
+
+    const exitCreateDoc = () => {
+        // Dölj formuläret med CSS
+        document.getElementById("saveForm").style.display = "none";
+
+        // // Ta bort nedanstående om något krånglar!!!
+        // let element = document.querySelector("trix-editor");
+
+        // if (element) {
+        //     element.value = "";
+        //     element.editor.setSelectedRange([0, 0]);
+        //     element.editor.insertHTML("");
+        // }
+    };
+
     const logout = () => {
         window.location.reload();
     };
@@ -187,10 +228,6 @@ const Editor = () => {
                 <select id = "selectDoc" onChange = { handleSelectedDoc } >
                     <option value = "-99" key = "0"> Choose a document </option>
                     {docs.map((doc, index) => <option value = {index} key = {index}> {doc.name} </option>)}
-
-
-                    {/* <option value = "-99" key = "0"> Choose a document </option>
-                    {docs.filter(doc) => doc.owner.includes(currentUser)} */}
                 </select>
                 </>
                 :
@@ -198,14 +235,19 @@ const Editor = () => {
                 }
 
                 <button className = "button" onClick = {()=> updateObject() }> Update </button>
+
+                <button id = "addEditorButton" className = "button" style = {{display: "none"}} onClick = { addEditor }> Add editor </button>
+
                 <button className = "button" onClick = {()=> logout() }> Logout </button>
+
             </trix-toolbar>
 
-            <form className = "saveForm" id = "saveForm" onSubmit = { (event) => { createObject(event);} } style = {{display: "none"}}>Name of file:
+            <form className = "saveForm" id = "saveForm" onSubmit = { (event) => { createObject(event);} } style = {{display: "none"}}> Name of file:
                 <input className = "button" id = "fileName" type = "text" value = { name } onChange = { (event) => { setDocName(event); } } >
                 </input>
 
                 <input className = "button" type = "submit" value = "Save"></input>
+                <button className = "button" onChange = { exitCreateDoc }> Exit </button>
             </form>
 
             <TrixEditor id = "trixEditorContent" className = "trix-editor" toolbar = "trix-toolbar"
@@ -215,56 +257,13 @@ const Editor = () => {
             />
             </>
              : 
-            <Login setToken={setToken} setCurrentUser={setCurrentUser}/>
+            <Login setToken = { setToken } setCurrentUser = { setCurrentUser }/>
     } 
         </div>
     )
 }
 
 export default Editor
-
-
-// Exemplet från föreläsning med att socket inte ska trigga ett change-event i frontend:
-
-//   function handleChange(html, text) {
-//     if (updateCurrentDocOnChange) {
-//         const copy = Object.assign({}, currentDoc);
-//         copy.html = html;
-//         setCurrentDoc(copy);
-//     }
-
-//     updateCurrentDocOnChange = true;
-//   }
-
-//   function setEditorContent(content, triggerChange) {
-//       let element = document.querySelector("trix-editor");
-
-//       updateCurrentDocOnChange = triggerChange;
-//       element.value = "";
-//       element.editor.setSelectedRange([0, 0]);
-//       updateCurrentDocOnChange = triggerChange;
-//       element.editor.insertHTML(content);
-//   }
-
-// Exempel från föreläsningen om throttling:
-
-// let throttleTimer;
-
-// io.sockets.on('connection', function(socket) {
-//     socket.on('create', function(room) {
-//         socket.join(room);
-//     });
-
-//     socket.on("docsData", function (data) {
-//         socket.to(data["_id"]).emit("docsData", data);
-
-//         clearTimeout(throttleTimer);
-//         console.log("writing");
-//         throttleTimer = setTimeout(function() {
-//             console.log("now it should save to database")
-//         }, 2000);
-//     });
-// });
 
 // Jag hade lite problem med att min markör hela tiden hoppade till slutet av min text i trixeditor i React när jag skrev i editorn efter att ha implementerat sockets. Det gjorde det svårt att ändra text "mitt i" ett textblock. Visade sig bero på att setEditorContent funktionen rensar editorn och lägger in nytt innehåll. Efter att ha pratat med @efo modifierade jag setEditorContent funktionen till följande (delar här om någon sitter med samma problem) vilket verkar fungera (markören "stannar" där den var): 
 

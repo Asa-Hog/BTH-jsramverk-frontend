@@ -24,25 +24,30 @@ export default function Login({setToken, setCurrentUser}) {
 
     async function login() {
         const loginResult = await authModel.login(user);
+        console.log(loginResult);
 
-        if (loginResult.data.token) {
-            setToken(loginResult.data.token);
-        }
+            if (loginResult.data.token) {
+                setToken(loginResult.data.token);
+            }
     }
 
     return (
         <>
-        <h2>Login or register</h2>
+        <div className = "loginTitle">Texteditor</div>
+        <p>Login to access your account, or sign up today!</p>
 
-        {/* <form> */}
-            <input className = "button" type = "email" name = "email" onChange = { changeHandler }/>
+        <div className = "loginForm">
+            <label>E-mail</label>
+            <input className = "button" type = "email" name = "email" onChange = { changeHandler } required/>
+            <label>Password</label>
             <input className = "button" type = "password" name = "password"  onChange = { changeHandler }/>
 
-            <button className = "button" onClick = { login }> Log in </button>
-            <button className = "button" onClick = { register }> Register </button>
-        {/* </form> */}
+            <div className="loginButtonsDiv">
+                <button className = "button passwordButton" onClick = { login }> Log in </button>
+                <button className = "button registerButton" onClick = { register }> Register </button>
+            </div>
+
+        </div>
         </>
     );
 }
-
-// Lägg in checkToken på allt vi vill hämta från backend. Det ska inte gå att hämta data om token inte finns, eller är expired, eller inte stämmer

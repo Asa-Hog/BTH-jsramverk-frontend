@@ -69,8 +69,12 @@ body {
 }
 
 trix-toolbar {
-    background-color: #61dafb;
-    min-height: 75px;
+    /* background-color: #61dafb; */
+    background-color: #3BADA8;
+    min-height: 100px;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 100px;
 
 }
 
@@ -88,3 +92,51 @@ trix-toolbar {
   padding-left: 20px;
   padding-right: 20px;
 }
+
+.loginButtonsDiv {
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+}
+
+.passwordButton {
+  /* background-color: #61dafb; */
+  background-color: #3BADA8;
+  width: 150px;
+}
+
+.registerButton {
+  /* background-color: aqua; */
+  width: 150px;
+}
+
+.loginForm {
+  display: flex;
+  flex-direction: column;
+  width: 500px;
+  margin: 0 auto;
+  border: 1px dotted #013E2C;
+  box-shadow: 5px 10px #013E2C;
+  padding: 50px;
+  margin-top: 50px;
+  border-radius: 4px;
+  /* background-color: beige; */
+}
+
+.loginTitle {
+  background-color: #61dafb;
+  background-color: #282c34;
+  background-color: #013E2C;
+  /* background-color: #043D0C; */
+  color: white;
+  font-size: 80px;
+  text-align: center;
+  vertical-align: middle;
+  line-height: 250px;
+  margin-bottom: 50px;
+  /* background-image: radial-gradient(to bottom right, #013E2C, #282c34); */
+}
+
+/* .App { 
+   background-color: lightgray
+} */

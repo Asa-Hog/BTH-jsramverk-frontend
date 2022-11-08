@@ -22,6 +22,7 @@ const Editor = () => {
     const [socket, setSocket] = useState(null);
     const [token, setToken] = useState("");
     const [currentUser, setCurrentUser] = useState("");
+    const [users, setUsers] = useState([]);
 
     // Hämta alla dokument
     useEffect(() => {
@@ -201,7 +202,7 @@ const Editor = () => {
 
         await docsModel.create(newDoc);
         hideSaveForm();
-        console.log("nytt dokument sparat", newDoc);
+        // console.log("nytt dokument sparat", newDoc);
     };
 
     const updateObject = async () => { 
@@ -209,9 +210,17 @@ const Editor = () => {
             alert("Please choose a file to update");
         } else {
             await docsModel.update(currentDoc);
-            console.log("dok nu uppdaterat");
+            // console.log("dok nu uppdaterat");
         }
     };
+
+    function showUsers() {
+        // alert("I am an alert box!");
+        let users = docsModel.getAllUsers();
+
+
+        console.log(users);
+    }
 
     return (
         <div className = "editor">
@@ -226,8 +235,11 @@ const Editor = () => {
                 { docs ?
                     <>
                 <select id = "selectDoc" onChange = { handleSelectedDoc } >
-                    <option value = "-99" key = "0"> Choose a document </option>
-                    {docs.map((doc, index) => <option value = {index} key = {index}> {doc.name} </option>)}
+                     <option value = "-99" key = "0"> Choose a document </option>
+                   {docs.map((doc, index) => <option value = {index} key = {index}> {doc.name} </option>)}
+
+                    {/* {docs.map((doc, index) => <option value = {index} key = {index}> {doc} </option>)} */}
+
                 </select>
                 </>
                 :
@@ -237,6 +249,8 @@ const Editor = () => {
                 <button className = "button" onClick = {()=> updateObject() }> Update </button>
 
                 <button id = "addEditorButton" className = "button" style = {{display: "none"}} onClick = { addEditor }> Add editor </button>
+
+                <button className = "button" onClick = {()=> showUsers() }> Users </button>
 
                 <button className = "button" onClick = {()=> logout() }> Logout </button>
 

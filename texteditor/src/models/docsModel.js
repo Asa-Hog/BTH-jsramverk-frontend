@@ -22,6 +22,7 @@ const docsModel = {
         return result.data;
     },
 
+
     getAllDocs: async function getAllDocs(token) {
         const response = await fetch(`${docsModel.baseUrl}/docs`
         , {
@@ -34,6 +35,54 @@ const docsModel = {
         const result = await response.json();
 
         return result.data;
+    },
+
+
+    // getAllDocs:
+
+    //     async function getAllDocs(token) {
+    //     const response = await fetch(`${docsModel.baseUrl}/graphql`
+    //     , {
+    //         method: 'POST',
+    //         headers: {
+    //             'Content-Type': 'application/json',
+    //             'Accept': 'application/json',
+    //             "x-access-token": token
+    //         },
+    //         body: JSON.stringify({ query: "{ docs { name } }" })
+    //     }
+    //     );
+
+    //     const result = await response.json();
+
+    //     let namesList = [];
+    //     for (let i = 0; i < result.data.docs.length; i++) {
+    //         namesList.push(result.data.docs[i].name)
+    //     }
+
+    //     return namesList;
+    // },
+
+        getAllUsers: async function getAllUsers() {
+            const response = await fetch(`${docsModel.baseUrl}/graphql`
+            , {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({ query: "{ users { name } }" })
+            }
+        );
+
+        const result = await response.json();
+
+        let namesList = [];
+        for (let i = 0; i < result.data.docs.length; i++) {
+            namesList.push(result.data.docs[i].name)
+        }
+
+        return namesList;
     },
 
 

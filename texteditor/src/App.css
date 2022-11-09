@@ -142,6 +142,12 @@ trix-toolbar {
   /* background-image: radial-gradient(to bottom right, #013E2C, #282c34); */
 }
 
+.usersP {
+  display: block;
+  /* flex-direction: row; */
+  
+}
+
 /* .App { 
    background-color: lightgray
 } */

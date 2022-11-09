@@ -5,7 +5,7 @@ import { io } from "socket.io-client";
 // import ReactHtmlParser from 'react-html-parser';
 // import "trix";
 import docsModel from '../models/docsModel';
-// import authModel from '../models/auth';
+import authModel from '../models/auth';
 // import Login from "./components/Login";
 import Login from "./Login";
 
@@ -14,7 +14,7 @@ let sendToSocket = true;
 
 const Editor = () => {
     let updateCurrentDocOnChange;
-    let [data, setData] = useState('');
+    const [data, setData] = useState('');
     const [name, setName] = useState('');
     const [docs, setDocs] = useState([]);
     const [currentDoc, setCurrentDoc] = useState({});
@@ -22,7 +22,7 @@ const Editor = () => {
     const [socket, setSocket] = useState(null);
     const [token, setToken] = useState("");
     const [currentUser, setCurrentUser] = useState("");
-    const [users, setUsers] = useState([]);
+    const [appUsers, setAppUsers] = useState([]);
 
     // Hämta alla dokument
     useEffect(() => {
@@ -57,6 +57,11 @@ const Editor = () => {
         setEditorContent(data, false);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data]);
+
+    // Skriver ut användare
+    useEffect(() => {
+        showUsers();
+    }, []);
 
     // Varje gång det ändras i en socket
     useEffect(() => {
@@ -145,7 +150,6 @@ const Editor = () => {
         document.getElementById("saveForm").style.display = "none";
     };
 
-    
     function showAddEditorButton() {
         // Visa knappen med CSS
         document.getElementById("addEditorButton").style.display = "inline-block";
@@ -159,14 +163,13 @@ const Editor = () => {
         // if (currentDoc === undefined) {
             // alert("FEL");
         // } else {
-            await docsModel.addUser(currentDoc, email);
+            await docsModel.addEditor(currentDoc, email);
             // console.log("dok nu uppdaterat");
         // }
 
 
         // hideAddEditorsButton()
     };
-
 
     const exitCreateDoc = () => {
         // Dölj formuläret med CSS
@@ -214,12 +217,9 @@ const Editor = () => {
         }
     };
 
-    function showUsers() {
-        // alert("I am an alert box!");
-        let users = docsModel.getAllUsers();
-
-
-        console.log(users);
+    const showUsers = async () => {
+        let users = await authModel.getAllUsers();
+        setAppUsers(users);
     }
 
     return (
@@ -248,9 +248,12 @@ const Editor = () => {
 
                 <button className = "button" onClick = {()=> updateObject() }> Update </button>
 
-                <button id = "addEditorButton" className = "button" style = {{display: "none"}} onClick = { addEditor }> Add editor </button>
+                <button id = "addEditorButton" className = "button" onClick = { addEditor }> Add editor </button>
 
-                <button className = "button" onClick = {()=> showUsers() }> Users </button>
+                <select className = "button usersDiv" id = "usersDiv">
+                    <option value = "-99" key = "0"> App users </option>
+                    { appUsers.map((appUser, index) => <option value = { index } key = { index }> { appUser } </option>)}
+                </select>
 
                 <button className = "button" onClick = {()=> logout() }> Logout </button>
 
@@ -269,9 +272,9 @@ const Editor = () => {
                 // onChange={props.change} // value = { data } // input = 'react-trix-editor'
                 // autoFocus={true} // default={props.default}
             />
-            </>
+             </>
              : 
-            <Login setToken = { setToken } setCurrentUser = { setCurrentUser }/>
+            <Login setToken = { setToken } setCurrentUser = { setCurrentUser } />
     } 
         </div>
     )

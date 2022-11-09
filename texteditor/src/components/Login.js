@@ -11,9 +11,9 @@ export default function Login({setToken, setCurrentUser}) {
         newObject[event.target.name] = event.target.value;
 
         setUser({...user, ...newObject});
-        // console.log(user);
+
         setCurrentUser(user.email);
-        // console.log("currentUser satt till ", user); // Sista siffran i pwd saknas...?
+
     }
 
 

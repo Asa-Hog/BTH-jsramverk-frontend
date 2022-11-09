@@ -37,6 +37,29 @@ const auth = {
 
         return result;
     },
+
+
+    getAllUsers: async function getAllUsers() {
+        const response = await fetch(`${docsModel.baseUrl}/graphql`
+            , {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({ query: "{ users { email } }" })
+            }
+        );
+        const result = await response.json();
+
+        if (result) {
+            let emailList = [];
+            for (let i = 0; i < result.data.users.length; i++) {
+                emailList.push(result.data.users[i].email)
+            }
+            return emailList;
+        }
+    }
 };
 
 export default auth;

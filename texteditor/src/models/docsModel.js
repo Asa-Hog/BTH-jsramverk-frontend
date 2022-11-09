@@ -38,67 +38,17 @@ const docsModel = {
     },
 
 
-    // getAllDocs:
-
-    //     async function getAllDocs(token) {
-    //     const response = await fetch(`${docsModel.baseUrl}/graphql`
-    //     , {
-    //         method: 'POST',
-    //         headers: {
-    //             'Content-Type': 'application/json',
-    //             'Accept': 'application/json',
-    //             "x-access-token": token
-    //         },
-    //         body: JSON.stringify({ query: "{ docs { name } }" })
-    //     }
-    //     );
-
-    //     const result = await response.json();
-
-    //     let namesList = [];
-    //     for (let i = 0; i < result.data.docs.length; i++) {
-    //         namesList.push(result.data.docs[i].name)
-    //     }
-
-    //     return namesList;
-    // },
-
-        getAllUsers: async function getAllUsers() {
-            const response = await fetch(`${docsModel.baseUrl}/graphql`
-            , {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify({ query: "{ users { name } }" })
-            }
-        );
-
-        const result = await response.json();
-
-        let namesList = [];
-        for (let i = 0; i < result.data.docs.length; i++) {
-            namesList.push(result.data.docs[i].name)
-        }
-
-        return namesList;
-    },
-
-
     create: async function create(newDoc) {
-        // console.log("newDoc model", newDoc);
         const response = await fetch(`${docsModel.baseUrl}/create`,
             { 
                 method: "POST",
                 headers: {'Content-Type': 'application/json'},
-                // headers: {'Content-Type': 'Access-Control-Allow-Origin'},
                 body: JSON.stringify(newDoc)
             }
         );
 
         const result = await response.json();
-        // console.log("frontend docsmodel result create", result);
+
         return result.data;
     },
 
@@ -108,22 +58,19 @@ const docsModel = {
             { 
                 method: "PUT",
                 headers: {"Content-Type": "application/json"},
-                // headers: {'Content-Type': 'Access-Control-Allow-Origin'},
-                // headers: {"Content-type": "application/x-www-form-urlencoded"},
                 body: JSON.stringify(doc)
             }
         );
 
         const result = await response.json();
-        // console.log("frontend docsmodel result update", result);
         return result;
     },
 
-    addUser: async function addUser(doc, email) {
+    addEditor: async function addUser(doc, email) {
         let data = {doc: doc,
              email:email};
 
-        const response = await fetch(`${docsModel.baseUrl}/addUser`,
+        const response = await fetch(`${docsModel.baseUrl}/addEditor`,
             { 
                 method: "PUT",
                 headers: {"Content-Type": "application/json"},

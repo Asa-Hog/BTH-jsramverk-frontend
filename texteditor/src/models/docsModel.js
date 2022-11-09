@@ -63,6 +63,7 @@ const docsModel = {
         );
 
         const result = await response.json();
+
         return result;
     },
 
@@ -79,7 +80,6 @@ const docsModel = {
         );
 
         const result = await response.json();
-        console.log(result);
 
         return result;
     }

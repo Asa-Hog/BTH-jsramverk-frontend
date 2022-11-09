@@ -13,7 +13,6 @@ export default function Login({setToken, setCurrentUser}) {
         setUser({...user, ...newObject});
 
         setCurrentUser(user.email);
-
     }
 
 
@@ -24,7 +23,6 @@ export default function Login({setToken, setCurrentUser}) {
 
     async function login() {
         const loginResult = await authModel.login(user);
-        // console.log(loginResult);
 
             if (loginResult.data.token) {
                 setToken(loginResult.data.token);

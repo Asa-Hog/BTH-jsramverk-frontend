@@ -9,7 +9,6 @@ import authModel from '../models/auth';
 // import Login from "./components/Login";
 import Login from "./Login";
 
-
 let sendToSocket = true;
 
 const Editor = () => {
@@ -250,10 +249,16 @@ const Editor = () => {
 
                 <button id = "addEditorButton" className = "button" onClick = { addEditor }> Add editor </button>
 
+                { appUsers ?
+                    <>
                 <select className = "button usersDiv" id = "usersDiv">
                     <option value = "-99" key = "0"> App users </option>
                     { appUsers.map((appUser, index) => <option value = { index } key = { index }> { appUser } </option>)}
                 </select>
+                </>
+                :
+                <h2>"Users not found"</h2>
+                }
 
                 <button className = "button" onClick = {()=> logout() }> Logout </button>
 
@@ -275,7 +280,7 @@ const Editor = () => {
              </>
              : 
             <Login setToken = { setToken } setCurrentUser = { setCurrentUser } />
-    } 
+            } 
         </div>
     )
 }

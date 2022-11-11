@@ -223,17 +223,18 @@ const Editor = () => {
 
     return (
         <div className = "editor">
-
             { token ?
             <>
+            
             <trix-toolbar id = "trix-toolbar">
+            {/* <trix-toolbar className="ordToolbar"></trix-toolbar> */}
 
-                <button className = "button" onClick = {()=> resetDb() }> Reset </button>
-                <button className = "button" onClick = {(event)=> showSaveForm(event) }> Create new </button>
+                <button className = "button trixButton" onClick = {()=> resetDb() }> Reset </button>
+                <button className = "button trixButton" onClick = {(event)=> showSaveForm(event) }> Create new </button>
 
                 { docs ?
                     <>
-                <select id = "selectDoc" onChange = { handleSelectedDoc } >
+                <select id = "selectDoc" className = " button trixButton" onChange = { handleSelectedDoc } >
                      <option value = "-99" key = "0"> Choose a document </option>
                    {docs.map((doc, index) => <option value = {index} key = {index}> {doc.name} </option>)}
 
@@ -245,13 +246,13 @@ const Editor = () => {
                 <h2>"Docs not found"</h2>
                 }
 
-                <button className = "button" onClick = {()=> updateObject() }> Update </button>
+                <button className = "button trixButton" onClick = {()=> updateObject() }> Update </button>
 
-                <button id = "addEditorButton" className = "button" onClick = { addEditor }> Add editor </button>
+                <button id = "addEditorButton" className = "button trixButton" onClick = { addEditor }> Add editor </button>
 
                 { appUsers ?
                     <>
-                <select className = "button usersDiv" id = "usersDiv">
+                <select className = "button trixButton usersDiv" id = "usersDiv">
                     <option value = "-99" key = "0"> App users </option>
                     { appUsers.map((appUser, index) => <option value = { index } key = { index }> { appUser } </option>)}
                 </select>
@@ -260,7 +261,12 @@ const Editor = () => {
                 <h2>"Users not found"</h2>
                 }
 
-                <button className = "button" onClick = {()=> logout() }> Logout </button>
+                <button className = "button trixButton" onClick = {()=> logout() }> Send PDF </button>
+                <button className = "button trixButton" onClick = {()=> logout() }> Comment </button>
+                <button className = "button trixButton" onClick = {()=> logout() }> E-mail </button>
+                <button className = "button trixButton" onClick = {()=> logout() }> Code mode </button>
+
+                <button className = "button trixButton" onClick = {()=> logout() }> Logout </button>
 
             </trix-toolbar>
 

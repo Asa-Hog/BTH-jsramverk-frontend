@@ -31,18 +31,21 @@ export default function Login({setToken, setCurrentUser}) {
 
     return (
         <>
-        <div className = "loginTitle">Texteditor</div>
-        <p>Login to access your account, or sign up today!</p>
+        <div className="loginDiv">
+            <div className = "loginTitle">Text editor</div>
+            <p className="loginP">Login to access your account, or sign up today!</p>
 
-        <div className = "loginForm">
-            <label>E-mail</label>
-            <input className = "button" type = "email" name = "email" onChange = { changeHandler } required/>
-            <label>Password</label>
-            <input className = "button" type = "password" name = "password"  onChange = { changeHandler }/>
+            <div className = "loginForm">
+                <label className="loginLabel">E-mail</label>
+                <input className = "button" type = "email" name = "email" onChange = { changeHandler } required/>
+                <label className="loginLabel">Password</label>
+                <input className = "button" type = "password" name = "password"  onChange = { changeHandler }/>
 
-            <div className="loginButtonsDiv">
-                <button className = "button passwordButton" onClick = { login }> Log in </button>
-                <button className = "button registerButton" onClick = { register }> Register </button>
+                <div className="loginButtonsDiv">
+                    <button className = "button passwordButton" onClick = { login }> Log in </button>
+                    <button className = "button registerButton" onClick = { register }> Register </button>
+                </div>
+
             </div>
 
         </div>

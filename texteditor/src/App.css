@@ -57,7 +57,7 @@ body {
 .editor {
   /* min-height: 200px; */
   /* border: 1px solid black; */
-  margin-top: 0px;
+  /* margin-top: 0px; */
   font-size: 28px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
@@ -72,20 +72,26 @@ body {
   /* border-top: 1px solid black; */
   /* width: 800px;  */
   /* width: 500px; */
-  min-height: 400px;
-  height: 86vh; 
-  margin: 0 auto;
+  /* min-height: 400px; */
+  /* height: 86vh;  */
+  /* margin: 0 auto; */
   background-color: white;
+  text-align: justify;
 }
 
 trix-toolbar {
     /* background-color: #35073D; */
     background-color: #013E2C;
+    background-color: #118A65;
     /* background-image: url("../src/images/paper2.jpg"); */
     min-height: 150px;
     text-align: center;
     vertical-align: middle;
     line-height: 150px;
+    /* text-align: center;
+    justify-content: center;
+    align-items: center; */
+
 }
 /* .ordToolbar {
   text-align: center;
@@ -110,6 +116,7 @@ trix-toolbar {
   /* background-image: url("../src/images/paper2.jpg"); */
   /* border: 1px solid #8A670A; */
   background-color: #FBFAF5;
+
   /* color: #3D2F07; */
   /* color: #8A670A; */
   color: #118A65;

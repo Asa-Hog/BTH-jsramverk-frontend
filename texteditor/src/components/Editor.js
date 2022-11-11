@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { TrixEditor } from "react-trix";
 import "trix/dist/trix.css";
 import { io } from "socket.io-client";
@@ -8,6 +8,7 @@ import docsModel from '../models/docsModel';
 import authModel from '../models/auth';
 // import Login from "./components/Login";
 import Login from "./Login";
+import {useReactToPrint} from 'react-to-print';
 
 let sendToSocket = true;
 
@@ -219,7 +220,16 @@ const Editor = () => {
     const showUsers = async () => {
         let users = await authModel.getAllUsers();
         setAppUsers(users);
-    }
+    };
+
+        const componentRef = useRef();
+
+        const generatePDF = useReactToPrint({
+            content: () => componentRef.current,
+            // documentTitle: 'dgf'
+            // onAfterPrint: () => alert('Print success')
+            copyStyles: false
+        });
 
     return (
         <div className = "editor">
@@ -261,7 +271,7 @@ const Editor = () => {
                 <h2>"Users not found"</h2>
                 }
 
-                <button className = "button trixButton" onClick = {()=> logout() }> Send PDF </button>
+                <button className = "button trixButton" onClick = {()=> generatePDF() }> Print </button>
                 <button className = "button trixButton" onClick = {()=> logout() }> Comment </button>
                 <button className = "button trixButton" onClick = {()=> logout() }> E-mail </button>
                 <button className = "button trixButton" onClick = {()=> logout() }> Code mode </button>
@@ -270,7 +280,7 @@ const Editor = () => {
 
             </trix-toolbar>
 
-            <form className = "saveForm" id = "saveForm" onSubmit = { (event) => { createObject(event);} } style = {{display: "none"}}> Name of file:
+            <form className = "saveForm" id = "saveForm" onSubmit = { (event) => { createObject(event);} } style = {{ display: "none" }}> Name of file:
                 <input className = "button" id = "fileName" type = "text" value = { name } onChange = { (event) => { setDocName(event); } } >
                 </input>
 
@@ -279,7 +289,7 @@ const Editor = () => {
             </form>
 
             <TrixEditor id = "trixEditorContent" className = "trix-editor" toolbar = "trix-toolbar"
-                onChange = { handleChange }
+                onChange = { handleChange } ref = { componentRef }
                 // onChange={props.change} // value = { data } // input = 'react-trix-editor'
                 // autoFocus={true} // default={props.default}
             />

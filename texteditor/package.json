@@ -10,6 +10,7 @@
     "react-dom": "^18.1.0",
     "react-html-parser": "^2.0.2",
     "react-scripts": "4.0.3",
+    "react-to-print": "^2.14.8",
     "react-trix": "^0.10.0",
     "socket.io-client": "^4.5.2",
     "web-vitals": "^1.1.2"

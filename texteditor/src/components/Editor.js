@@ -9,7 +9,8 @@ import authModel from '../models/auth';
 // import Login from "./components/Login";
 import Login from "./Login";
 import {useReactToPrint} from 'react-to-print';
-
+import {basicSetup, EditorView} from "codemirror"
+import {javascript} from "@codemirror/lang-javascript"
 let sendToSocket = true;
 
 const Editor = () => {
@@ -157,18 +158,29 @@ const Editor = () => {
 
     async function addEditor() {
         let email = prompt("Enter email of user allowed to edit document: ");
-        // Spara email i databasen för det dokumentet - allowed editors
-        // console.log("cd", currentDoc);
 
-        // if (currentDoc === undefined) {
-            // alert("FEL");
-        // } else {
+        if (email !== null && email !== "") {
+            // Spara email i databasen för det dokumentet - allowed editors
             await docsModel.addEditor(currentDoc, email);
-            // console.log("dok nu uppdaterat");
-        // }
+            console.log("spara i databasen");
 
+            let sendInvite = window.confirm(`Do you want to send an invitation to ` + email + `?`);
 
-        // hideAddEditorsButton()
+            // Maila ut inbjudan till användaren?
+            if (sendInvite === true ) {
+                sendEmail(email);
+            }
+        }
+    };
+
+    async function invite(token) {
+        let email = prompt("Enter email of user to invite: ");
+
+        if (email !== null && email !== "") {
+            // Spara INTE email i databasen - ska redan vara gjort
+            // Maila ut inbjudan till användaren
+            sendEmail(email, token);
+        }
     };
 
     const exitCreateDoc = () => {
@@ -222,14 +234,21 @@ const Editor = () => {
         setAppUsers(users);
     };
 
-        const componentRef = useRef();
+    const componentRef = useRef();
 
-        const generatePDF = useReactToPrint({
-            content: () => componentRef.current,
-            // documentTitle: 'dgf'
-            // onAfterPrint: () => alert('Print success')
-            copyStyles: false
-        });
+    const generatePDF = useReactToPrint({
+        content: () => componentRef.current,
+        // documentTitle: 'dgf'
+        // onAfterPrint: () => alert('Print success')
+        copyStyles: false
+    });
+
+    const sendEmail = (email, token) => {
+        // let currentUser = authModel.currentUser.data.email;
+        let res = authModel.invite(email, currentUser, token);
+        console.log("editor res", res);
+
+    };
 
     return (
         <div className = "editor">
@@ -239,8 +258,9 @@ const Editor = () => {
             <trix-toolbar id = "trix-toolbar">
             {/* <trix-toolbar className="ordToolbar"></trix-toolbar> */}
 
-                <button className = "button trixButton" onClick = {()=> resetDb() }> Reset </button>
-                <button className = "button trixButton" onClick = {(event)=> showSaveForm(event) }> Create new </button>
+                {/* <button className = "button trixButton" onClick = {()=> resetDb() }> Reset </button> */}
+
+                <button className = "button trixButton" onClick = {(event)=> showSaveForm(event) }> Create </button>
 
                 { docs ?
                     <>
@@ -272,11 +292,14 @@ const Editor = () => {
                 }
 
                 <button className = "button trixButton" onClick = {()=> generatePDF() }> Print </button>
-                <button className = "button trixButton" onClick = {()=> logout() }> Comment </button>
-                <button className = "button trixButton" onClick = {()=> logout() }> E-mail </button>
-                <button className = "button trixButton" onClick = {()=> logout() }> Code mode </button>
 
-                <button className = "button trixButton" onClick = {()=> logout() }> Logout </button>
+                <button className = "button trixButton" onClick = {()=> logout() }> Comment </button>
+
+                <button className = "button trixButton" onClick = {()=> invite() }> Invite </button>
+
+                <button className = "button trixButton" onClick = {()=> logout() }> Code </button>
+
+                <button className = "button trixButton" onClick = {()=> logout() }> Log out </button>
 
             </trix-toolbar>
 
@@ -293,6 +316,21 @@ const Editor = () => {
                 // onChange={props.change} // value = { data } // input = 'react-trix-editor'
                 // autoFocus={true} // default={props.default}
             />
+
+            <div className = "code">
+                <textarea id = "code" >
+                    <h1>Hello</h1>
+                </textarea>
+            </div>
+
+            {/* new EditorView({
+                doc: "console.log('hello')\n",
+                extensions: [basicSetup, javascript()],
+                parent: document.body
+                }) */}
+
+
+
              </>
              : 
             <Login setToken = { setToken } setCurrentUser = { setCurrentUser } />

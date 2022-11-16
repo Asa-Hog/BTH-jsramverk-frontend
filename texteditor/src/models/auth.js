@@ -5,6 +5,8 @@ const baseUrl = docsModel.baseUrl; //"http://localhost:1337";
 const auth = {
     // token: "",
 
+    currentUser: "",
+
     login: async function login(user) {
         const response = await fetch(`${baseUrl}/auth/login`, {
             method: "POST",
@@ -16,6 +18,7 @@ const auth = {
 
         const result = await response.json();
 
+        this.currentUser = result;
         // console.log(result.token);
 
         return result;
@@ -40,7 +43,7 @@ const auth = {
 
 
     getAllUsers: async function getAllUsers() {
-        const response = await fetch(`${docsModel.baseUrl}/graphql`
+        const response = await fetch(`${baseUrl}/graphql`
             , {
                 method: 'POST',
                 headers: {
@@ -59,6 +62,22 @@ const auth = {
             }
             return emailList;
         }
+    },
+
+    invite: async function invite(email) {
+        console.log("1 frontend model invite function");
+        const response = await fetch(`${baseUrl}/auth/invite`,
+        {
+                method: "POST",
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(email)
+        });
+
+        console.log("4 frontend model response", response);
+
+        // const result = await response.json();
+
+        // return result.data;
     }
 };
 

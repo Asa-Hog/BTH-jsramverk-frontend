@@ -4,8 +4,11 @@
   "private": true,
   "homepage": ".",
   "dependencies": {
+    "@codemirror/lang-javascript": "^6.1.1",
+    "@sendgrid/mail": "^7.7.0",
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^12.8.3",
+    "codemirror": "^6.0.1",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
     "react-html-parser": "^2.0.2",

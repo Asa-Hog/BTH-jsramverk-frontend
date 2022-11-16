@@ -1,5 +1,6 @@
 .App {
   text-align: center;
+  letter-spacing: 1px;
 }
 
 .App-logo {
@@ -40,26 +41,19 @@
 /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
 
 body {
-  /* background-color: whitesmoke; */
-  /* background-color: lightblue; */
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-
-  /* width: 100vw; */
   height: 100vh;
 }
 
 .header {
   display: flex;
   justify-content: center;
-
 }
 
 .editor {
-  /* min-height: 200px; */
-  /* border: 1px solid black; */
-  /* margin-top: 0px; */
   font-size: 28px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
 }
 
 .loginTitle {
@@ -68,38 +62,18 @@ body {
 }
 
 .trix-editor {
-  /* width: 50rem; */
-  /* border-top: 1px solid black; */
-  /* width: 800px;  */
-  /* width: 500px; */
-  /* min-height: 400px; */
-  /* height: 86vh;  */
-  /* margin: 0 auto; */
-  background-color: white;
   text-align: justify;
+  background-color: #F5F5F5;
+  height: 20vh;
 }
 
 trix-toolbar {
-    /* background-color: #35073D; */
-    background-color: #013E2C;
-    background-color: #118A65;
-    /* background-image: url("../src/images/paper2.jpg"); */
     min-height: 150px;
     text-align: center;
     vertical-align: middle;
     line-height: 150px;
-    /* text-align: center;
-    justify-content: center;
-    align-items: center; */
-
+    background-color: #013E2C;
 }
-/* .ordToolbar {
-  text-align: center;
-  vertical-align: middle;
-  line-height: 100px;
-  color: #FBFAF5;
-
-} */
 
 .button {
   margin: 10px;
@@ -113,27 +87,27 @@ trix-toolbar {
 
 .trixButton {
   background-color: #013E2C;
-  /* background-image: url("../src/images/paper2.jpg"); */
-  /* border: 1px solid #8A670A; */
-  background-color: #FBFAF5;
-
-  /* color: #3D2F07; */
-  /* color: #8A670A; */
-  color: #118A65;
-  color: #013E2C;
-  /* background-color: #3D2F07; */
-  /* border-radius: 50px; */
+  border: none;
+  color: #D5D5D5;
+  border-radius: 50px;
   font-size: 16px;
+  letter-spacing:1px;
+  border: 1px solid #018A61;
+  
 }
-/* BYT UT WHITE TILL MJUKARE VIT */
+
+.trixButton:hover{
+    background-color: #018A61;
+}
 
 #selectDoc {
-  font-size: 20px;
+  font-size: 16px;
   margin: 10px;
   padding: 15px;
   padding-left: 25px;
   padding-right: 25px;
-  border-radius: 4px;
+  border-radius: 50px;
+  letter-spacing:1px;
 }
 
 .loginButtonsDiv {
@@ -143,20 +117,17 @@ trix-toolbar {
 }
 
 .passwordButton {
-  background-color: #118A65;
-  /* background-color: #8A670A; */
+  background-color: #018A61;
+  color: #F5F5F5;
   width: 150px;
 }
 
 .registerButton {
-  /* background-color: aqua; */
   width: 150px;
 }
 
 .loginDiv {
-    background-image: url("../src/images/hand.jpg");
-      /* background-image: url("../src/images/desk.jpg"); */
-  /* background-image: url("../src/images/hand.jpg"); */
+  background-image: url("../src/images/hand.jpg");
   background-size: cover;
   height: 100vh;
 }
@@ -173,41 +144,49 @@ trix-toolbar {
   padding-bottom: 100px;
   margin-top: 130px;
   border-radius: 4px;
-  /* background-color: beige; */
 }
 
 .loginTitle {
-  background-color: lightgray;
-  /* background-color: #282c34; */
   background-color: #013E2C;
-  /* background-color: #043D0C; */
-  color: #FBFAF5;
+  color: #F5F5F5;
+  letter-spacing:5px;
 
   font-size: 80px;
   text-align: center;
   vertical-align: middle;
   line-height: 250px;
   margin-bottom: 50px;
-  /* background-image: radial-gradient(to bottom right, #013E2C, #282c34); */
 }
 
 .loginP {
   font-size: 34px;
   margin-top: 120px;
-  color: #FBFAF5;
+  color: #F5F5F5;
+}
 
+.loginbutton {
+  background-color: #F5F5F5;
+}
+
+.registerButton {
+  background-color: #F5F5F5;
 }
 
 .loginLabel {
-  color: #FBFAF5;
+  color: #F5F5F5;
 }
 
 .usersP {
   display: block;
-  /* flex-direction: row; */
-  
+  background-color: #F5F5F5;
 }
 
-/* .App { 
-   background-color: lightgray
-} */
+.code { 
+width: 100%;
+display: flex;
+position: relative;
+}
+
+#code {
+  width: 100%;
+}

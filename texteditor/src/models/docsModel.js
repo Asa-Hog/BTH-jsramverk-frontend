@@ -6,7 +6,7 @@ const docsModel = {
 
 
     getCurrentUser: function getCurrentUser() {
-        const res = fetch(`${docsModel.baseUrl}/auth/currentUser`);
+        const res = fetch(`${docsModel.baseUrl}/users/currentUser`);
 
         // const result = response.json();
 

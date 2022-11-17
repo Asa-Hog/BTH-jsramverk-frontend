@@ -62,9 +62,9 @@ const docsModel = {
             }
         );
 
-        const result = await response.json();
+        // const result = await response.json();
 
-        return result;
+        return response;
     },
 
     addEditor: async function addUser(doc, email) {
@@ -82,6 +82,11 @@ const docsModel = {
         const result = await response.json();
 
         return result;
+    },
+
+    getAllowedUsers: async function getAllowedUsers(selectedDoc) {
+        console.log(selectedDoc);
+
     }
 };
 

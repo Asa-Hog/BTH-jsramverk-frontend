@@ -75,6 +75,11 @@ trix-toolbar {
     background-color: #013E2C;
 }
 
+trix-button-row {
+  border: 1px solid #018A61;
+  background-color: #018A61;
+}
+
 .button {
   margin: 10px;
   font-size: 20px;
@@ -155,7 +160,22 @@ trix-toolbar {
   text-align: center;
   vertical-align: middle;
   line-height: 250px;
-  margin-bottom: 50px;
+  padding-bottom: 50px;
+}
+
+.loginSubTitle {
+  /* background-color: #013E2C; */
+  /* color: #F5F5F5; */
+  letter-spacing:5px;
+
+  font-size: 26px;
+  text-align: center;
+  vertical-align:top;
+  font-style: italic;
+  line-height: 0px;
+  margin-top: 0px;
+  /* font-family:Verdana, Geneva, Tahoma, sans-serif; */
+  /* padding-bottom: 50px; */
 }
 
 .loginP {
@@ -189,4 +209,10 @@ position: relative;
 
 #code {
   width: 100%;
+  background-color: #282c34;
+}
+
+.ordToolbar {
+  border: 1px solid #018A61;
+  align-items: center;
 }

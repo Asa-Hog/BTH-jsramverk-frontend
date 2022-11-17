@@ -3,8 +3,6 @@ import docsModel from "../models/docsModel";
 const baseUrl = docsModel.baseUrl; //"http://localhost:1337";
 
 const auth = {
-    // token: "",
-
     currentUser: "",
 
     login: async function login(user) {
@@ -19,12 +17,8 @@ const auth = {
         const result = await response.json();
 
         this.currentUser = result;
-        // console.log(result.token);
 
         return result;
-        // if (result.data.token) {
-        //     auth.token = result.data.token;
-        // }
     },
 
     register: async function register(user) {
@@ -65,19 +59,9 @@ const auth = {
     },
 
     invite: async function invite(email) {
-        console.log("1 frontend model invite function");
-        const response = await fetch(`${baseUrl}/auth/invite`,
-        {
-                method: "POST",
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(email)
-        });
+        const response = await fetch(`${baseUrl}/auth/invite/${email}`);
 
-        console.log("4 frontend model response", response);
-
-        // const result = await response.json();
-
-        // return result.data;
+        return response;
     }
 };
 

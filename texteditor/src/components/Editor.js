@@ -9,17 +9,17 @@ import authModel from '../models/auth';
 // import Login from "./components/Login";
 import Login from "./Login";
 import {useReactToPrint} from 'react-to-print';
-import {basicSetup, EditorView} from "codemirror"
-import {javascript} from "@codemirror/lang-javascript"
+// import {basicSetup, EditorView} from "codemirror"
+// import {javascript} from "@codemirror/lang-javascript"
 let sendToSocket = true;
 
 const Editor = () => {
     let updateCurrentDocOnChange;
+    const componentRef = useRef();
     const [data, setData] = useState('');
-    const [name, setName] = useState('');
     const [docs, setDocs] = useState([]);
     const [currentDoc, setCurrentDoc] = useState({});
-    const [selectedDoc, setSelectedDoc] = useState({}); // id på valt objekt
+    const [selectedDoc, setSelectedDoc] = useState(""); // id på valt objekt
     const [socket, setSocket] = useState(null);
     const [token, setToken] = useState("");
     const [currentUser, setCurrentUser] = useState("");
@@ -59,7 +59,7 @@ const Editor = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data]);
 
-    // Skriver ut användare
+    // Skriver ut alla användare av appen
     useEffect(() => {
         showUsers();
     }, []);
@@ -111,34 +111,17 @@ const Editor = () => {
     let handleSelectedDoc = () => {
         // Hämta värde ur selectlista
         let docId = document.getElementById("selectDoc").value; // 0, 1, 2
-        let doc = docs[docId]; // {"_id": 6140s3f01sd, "title": Saga, "html": Det var en gång}
+        if (docId !== "-99") {
+            let doc = docs[docId]; // {"_id": 6140s3f01sd, "title": Saga, "html": Det var en gång}
 
-        setSelectedDoc(doc["_id"]); // 6140s3f01sd - Ett id  1 currentDoc och selectedDoc sätts
-        setCurrentDoc(doc); // Ett objekt
-        setData(doc.html);
+            setSelectedDoc(doc["_id"]); // 6140s3f01sd - Ett id  1 currentDoc och selectedDoc sätts
+            setCurrentDoc(doc); // Ett objekt
+            setData(doc.html);
+        }
      };
 
     const resetDb = async () => {
         await docsModel.reset();
-    };
-
-    // const printData = () => { 
-    //     // console.log("skriv ut i konsollen");
-    //     // if (ReactHtmlParser(data)[0].props !== undefined) {
-    //     //     console.log( ReactHtmlParser(data)[0].props.children ); // ger en array med objekt i
-    //     // }
-    //     // for (let row in  ReactHtmlParser(data)[0].props.children[row]) {
-    //         // \filtrera ut element (br mm ?
-    //     //     console.log(row);
-    //     // }
-    //     if (data !== undefined) {
-    //         console.log(data);
-    //     };
-    // };
-
-    const setDocName = (event) => {
-        // console.log(event.target.value);
-        setName(event.target.value);
     };
 
     const showSaveForm = () => {
@@ -162,7 +145,6 @@ const Editor = () => {
         if (email !== null && email !== "") {
             // Spara email i databasen för det dokumentet - allowed editors
             await docsModel.addEditor(currentDoc, email);
-            console.log("spara i databasen");
 
             let sendInvite = window.confirm(`Do you want to send an invitation to ` + email + `?`);
 
@@ -173,59 +155,67 @@ const Editor = () => {
         }
     };
 
-    async function invite(token) {
+    async function invite() {
         let email = prompt("Enter email of user to invite: ");
 
         if (email !== null && email !== "") {
             // Spara INTE email i databasen - ska redan vara gjort
             // Maila ut inbjudan till användaren
-            sendEmail(email, token);
+            sendEmail(email);
         }
     };
 
-    const exitCreateDoc = () => {
+    const exitCreateDoc = (event) => {
+        event.preventDefault();
         // Dölj formuläret med CSS
         document.getElementById("saveForm").style.display = "none";
-
-        // // Ta bort nedanstående om något krånglar!!!
-        // let element = document.querySelector("trix-editor");
-
-        // if (element) {
-        //     element.value = "";
-        //     element.editor.setSelectedRange([0, 0]);
-        //     element.editor.insertHTML("");
-        // }
     };
 
     const logout = () => {
         window.location.reload();
     };
 
-    const createObject = async (event) => {
-        event.preventDefault();
-        let newDoc = {};
-        // console.log(currentDoc);
-        // console.log(data);
-
-        // newDoc.html = data;
-        newDoc.html = currentDoc.html;
-        newDoc.name = name;
-
-        console.log(currentUser);
-        newDoc.owner = currentUser;
-        newDoc.allowedUsers = [currentUser];
-
-        await docsModel.create(newDoc);
-        hideSaveForm();
-        // console.log("nytt dokument sparat", newDoc);
+    const createReset = () => {
+        document.getElementById("selectDoc").value = "-99";
+        setCurrentDoc({});
+        setSelectedDoc({});
+        setData("");
     };
 
-    const updateObject = async () => { 
-        if (currentDoc === undefined) {
-            alert("Please choose a file to update");
+    const create = async (event) => {
+        event.preventDefault();
+
+        let newName = document.getElementById("fileName").value;
+        let newDoc = {};
+
+        newDoc.html = currentDoc.html;
+        newDoc.name = newName;
+
+        if (newDoc.name === null || newDoc.name === "" || newDoc.name === undefined) {
+            alert("Document must have a title");
         } else {
-            await docsModel.update(currentDoc);
-            // console.log("dok nu uppdaterat");
+            newDoc.owner = currentUser;
+            newDoc.allowedUsers = [currentUser];
+
+            await docsModel.create(newDoc);
+            hideSaveForm();
+        }
+
+        setEditorContent("", false);
+    };
+
+    const update = async () => { 
+        // Hämta värde ur selectlistan. Om värdet är -99 har inget dokument valts
+        let docId = document.getElementById("selectDoc").value; // 0, 1, 2
+
+        if (docId === "-99") {
+            alert("Please choose a document to update.");
+        } else {
+            let res = await docsModel.update(currentDoc);
+
+            if (res.status === 200) {
+                alert("Document updated");
+            }
         }
     };
 
@@ -234,20 +224,18 @@ const Editor = () => {
         setAppUsers(users);
     };
 
-    const componentRef = useRef();
-
     const generatePDF = useReactToPrint({
         content: () => componentRef.current,
-        // documentTitle: 'dgf'
-        // onAfterPrint: () => alert('Print success')
         copyStyles: false
     });
 
-    const sendEmail = (email, token) => {
+    const sendEmail = async (email) => {
         // let currentUser = authModel.currentUser.data.email;
-        let res = authModel.invite(email, currentUser, token);
-        console.log("editor res", res);
+        let res = await authModel.invite(email);
 
+        if (res.status === 200 ) {
+            setTimeout(function () {window.alert("Email sent");}, 1000);
+        }
     };
 
     return (
@@ -258,25 +246,23 @@ const Editor = () => {
             <trix-toolbar id = "trix-toolbar">
             {/* <trix-toolbar className="ordToolbar"></trix-toolbar> */}
 
-                {/* <button className = "button trixButton" onClick = {()=> resetDb() }> Reset </button> */}
+                <button className = "button trixButton" onClick = {()=> resetDb() }> Reset </button>
 
-                <button className = "button trixButton" onClick = {(event)=> showSaveForm(event) }> Create </button>
+                <button className = "button trixButton"  onClick = {(event)=> {showSaveForm(event); createReset();} }> Create </button>
 
                 { docs ?
                     <>
                 <select id = "selectDoc" className = " button trixButton" onChange = { handleSelectedDoc } >
                      <option value = "-99" key = "0"> Choose a document </option>
                    {docs.map((doc, index) => <option value = {index} key = {index}> {doc.name} </option>)}
-
                     {/* {docs.map((doc, index) => <option value = {index} key = {index}> {doc} </option>)} */}
-
                 </select>
                 </>
                 :
                 <h2>"Docs not found"</h2>
                 }
 
-                <button className = "button trixButton" onClick = {()=> updateObject() }> Update </button>
+                <button className = "button trixButton" onClick = {()=> update() }> Update </button>
 
                 <button id = "addEditorButton" className = "button trixButton" onClick = { addEditor }> Add editor </button>
 
@@ -303,12 +289,14 @@ const Editor = () => {
 
             </trix-toolbar>
 
-            <form className = "saveForm" id = "saveForm" onSubmit = { (event) => { createObject(event);} } style = {{ display: "none" }}> Name of file:
-                <input className = "button" id = "fileName" type = "text" value = { name } onChange = { (event) => { setDocName(event); } } >
-                </input>
+            <form className = "saveForm" id = "saveForm"  style = {{ display: "none" }}> Name of file:
+                
+                <input className = "button" id = "fileName" type = "text" required >
+                </input> 
 
-                <input className = "button" type = "submit" value = "Save"></input>
-                <button className = "button" onChange = { exitCreateDoc }> Exit </button>
+                <button  type="submit" className = "button" onClick = { (event) => { create(event); }}> Save </button>
+
+                <button className = "button" onClick = { (event) => { exitCreateDoc(event); } }> Exit </button>
             </form>
 
             <TrixEditor id = "trixEditorContent" className = "trix-editor" toolbar = "trix-toolbar"
@@ -317,11 +305,11 @@ const Editor = () => {
                 // autoFocus={true} // default={props.default}
             />
 
-            <div className = "code">
+            {/* <div className = "code">
                 <textarea id = "code" >
                     <h1>Hello</h1>
                 </textarea>
-            </div>
+            </div> */}
 
             {/* new EditorView({
                 doc: "console.log('hello')\n",

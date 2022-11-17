@@ -32,7 +32,12 @@ export default function Login({setToken, setCurrentUser}) {
     return (
         <>
         <div className="loginDiv">
-            <div className = "loginTitle">Text Editor</div>
+            <div className = "loginTitle">
+                Text Editor
+                <p className = "loginSubTitle">a real-time collaborative document editor</p>
+            </div>
+
+
             <p className="loginP">Log in to access your account, or sign up today!</p>
 
             <div className = "loginForm">

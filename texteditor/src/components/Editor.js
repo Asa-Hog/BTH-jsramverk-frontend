@@ -140,28 +140,24 @@ const Editor = () => {
     }
 
     async function addEditor() {
-        let email = prompt("Enter email of user allowed to edit document: ");
+        let docId = document.getElementById("selectDoc").value; // 0, 1, 2
 
-        if (email !== null && email !== "") {
-            // Spara email i databasen för det dokumentet - allowed editors
-            await docsModel.addEditor(currentDoc, email);
+        if (docId === "-99") {
+            alert("Choose a document first.");
+        } else {
+            let email = prompt("Enter email of user allowed to edit document: ");
 
-            let sendInvite = window.confirm(`Do you want to send an invitation to ` + email + `?`);
-
-            // Maila ut inbjudan till användaren?
-            if (sendInvite === true ) {
-                sendEmail(email);
+            if (email !== null && email !== "") {
+                // Spara email i databasen för det dokumentet - allowed editors
+                await docsModel.addEditor(currentDoc, email);
+    
+                let sendInvite = window.confirm(`Do you want to send an invitation to ` + email + `?`);
+    
+                // Maila ut inbjudan till användaren?
+                if (sendInvite === true ) {
+                    sendEmail(email);
+                }
             }
-        }
-    };
-
-    async function invite() {
-        let email = prompt("Enter email of user to invite: ");
-
-        if (email !== null && email !== "") {
-            // Spara INTE email i databasen - ska redan vara gjort
-            // Maila ut inbjudan till användaren
-            sendEmail(email);
         }
     };
 
@@ -229,12 +225,21 @@ const Editor = () => {
         copyStyles: false
     });
 
+    async function invite() {
+        let email = prompt("Enter email of user to invite: ");
+
+        if (email !== null && email !== "") {
+            // Spara INTE email i databasen - ska redan vara gjort
+            // Maila ut inbjudan till användaren
+            sendEmail(email);
+        }
+    };
+
     const sendEmail = async (email) => {
-        // let currentUser = authModel.currentUser.data.email;
         let res = await authModel.invite(email);
 
         if (res.status === 200 ) {
-            setTimeout(function () {window.alert("Email sent");}, 1000);
+            setTimeout(function () {window.alert("Email sent.");}, 1000);
         }
     };
 

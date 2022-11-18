@@ -18,7 +18,7 @@ export default function Login({setToken, setCurrentUser}) {
 
     async function register() {
         await authModel.register(user);
-        alert("User successfully registered");
+        alert("User successfully registered.");
     }
 
     async function login() {

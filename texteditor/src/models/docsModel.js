@@ -87,6 +87,21 @@ const docsModel = {
     getAllowedUsers: async function getAllowedUsers(selectedDoc) {
         console.log(selectedDoc);
 
+    },
+
+    execute: async function execute(data) {
+        const res = await fetch("https://execjs.emilfolino.se/code", {
+            body: JSON.stringify(data),
+            headers: {
+                'content-type': 'application/json'
+            },
+            method: 'POST'
+        });
+
+        const result = await res.json();
+
+        return result;
+
     }
 };
 

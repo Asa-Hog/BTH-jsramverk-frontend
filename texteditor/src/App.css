@@ -203,14 +203,20 @@ trix-button-row {
 
 .code { 
 width: 100%;
-display: flex;
-position: relative;
+height: 300px;
+background-color: #1E1E1E; 
+/* // 282c34 */
+color: #F5F5F5;
+font-size: 20px;
 }
 
-#code {
+.codeTop { 
   width: 100%;
-  background-color: #282c34;
-}
+  background-color: #F5F5F5;
+  font-size: 24px;
+  border: 1px solid gray;
+  color: #282c34;
+ }
 
 .ordToolbar {
   border: 1px solid #018A61;

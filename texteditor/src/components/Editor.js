@@ -9,13 +9,14 @@ import authModel from '../models/auth';
 // import Login from "./components/Login";
 import Login from "./Login";
 import {useReactToPrint} from 'react-to-print';
-// import {basicSetup, EditorView} from "codemirror"
-// import {javascript} from "@codemirror/lang-javascript"
+import CodeEditor from "@monaco-editor/react";
+var Buffer = require('buffer/').Buffer
 let sendToSocket = true;
 
 const Editor = () => {
     let updateCurrentDocOnChange;
     const componentRef = useRef();
+    const codeRef = useRef();
     const [data, setData] = useState('');
     const [docs, setDocs] = useState([]);
     const [currentDoc, setCurrentDoc] = useState({});
@@ -24,6 +25,8 @@ const Editor = () => {
     const [token, setToken] = useState("");
     const [currentUser, setCurrentUser] = useState("");
     const [appUsers, setAppUsers] = useState([]);
+    const [codeData, setCodeData] = useState('');
+    const [codeResult, setCodeResult] = useState('');
 
     // Hämta alla dokument
     useEffect(() => {
@@ -58,6 +61,12 @@ const Editor = () => {
         setEditorContent(data, false);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data]);
+
+    // Skriver ut innehållet i kod-editorn när data ändras
+    useEffect(() => {
+        setCodeEditorContent(codeResult, false);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [codeResult]);
 
     // Skriver ut alla användare av appen
     useEffect(() => {
@@ -97,6 +106,23 @@ const Editor = () => {
         }
     };
 
+    function setCodeEditorContent(content, triggerChange) {
+        // let element = document.querySelector("trix-editor");
+        let element = document.getElementById("code-editor");
+        // console.log(element);
+        // console.log(element2);
+
+        if (element) {
+            updateCurrentDocOnChange = triggerChange;
+            element.value = "";
+            // element.setSelectedRange([0, 0]); //
+            updateCurrentDocOnChange = triggerChange;
+            element.innerHTML = content;
+        }
+
+        // codeRef.insertHTML(decodedResult);
+    };
+
     function handleChange (html, text) { // html = event
         if (updateCurrentDocOnChange) {
             // Skapa nytt obj (copy, som är kopia av currentDoc)
@@ -132,6 +158,28 @@ const Editor = () => {
     const hideSaveForm = () => {
         // Dölj formuläret med CSS
         document.getElementById("saveForm").style.display = "none";
+    };
+
+    const showCodeDiv = () => {
+        // Visa formuläret med CSS
+        document.getElementById("codeDiv").style.display = "block";
+    };
+
+
+    const hideCodeDiv = () => {
+        // Dölj formuläret med CSS
+        document.getElementById("codeDiv").style.display = "none";
+    };
+
+    const showTrixEditor = () => {
+        // Visa formuläret med CSS
+        document.getElementById("trixEditorContent").style.display = "block";
+    };
+
+
+    const hideTrixEditor = () => {
+        // Dölj formuläret med CSS
+        document.getElementById("trixEditorContent").style.display = "none";
     };
 
     function showAddEditorButton() {
@@ -186,6 +234,7 @@ const Editor = () => {
 
         newDoc.html = currentDoc.html;
         newDoc.name = newName;
+        newDoc.type = "text";
 
         if (newDoc.name === null || newDoc.name === "" || newDoc.name === undefined) {
             alert("Document must have a title");
@@ -242,6 +291,40 @@ const Editor = () => {
             setTimeout(function () {window.alert("Email sent.");}, 1000);
         }
     };
+    
+    async function execute() {
+        // create a buffer
+        let buff = Buffer.from(codeData, 'utf-8');
+        // decode buffer as Base64
+        let encodedData = buff.toString('base64');
+        let data = {
+            code: encodedData
+
+        };
+
+        let res = await docsModel.execute(data);
+
+        let encodedResult = res.data;
+        // create a buffer
+        buff = Buffer.from(encodedResult, 'base64');
+        // decode buffer as UTF-8
+        let decodedResult = buff.toString('utf-8');
+
+        setCodeResult(decodedResult);
+
+
+        // Fel med codeResult i st för Data om ska fungera med sockets?
+
+        // Spara resultat i databasen....
+
+        // Lägg till code-typ på dokumentet
+
+        // Toggle Code-knappen
+
+        // Göm/ visa texteditor/ codeeditor
+
+        // Sätt samtidigt värdet på type till ena eller andra
+    };
 
     return (
         <div className = "editor">
@@ -288,7 +371,7 @@ const Editor = () => {
 
                 <button className = "button trixButton" onClick = {()=> invite() }> Invite </button>
 
-                <button className = "button trixButton" onClick = {()=> logout() }> Code </button>
+                <button className = "button trixButton" onClick = {()=> { hideTrixEditor(); showCodeDiv();} }> Code </button>
 
                 <button className = "button trixButton" onClick = {()=> logout() }> Log out </button>
 
@@ -305,24 +388,33 @@ const Editor = () => {
             </form>
 
             <TrixEditor id = "trixEditorContent" className = "trix-editor" toolbar = "trix-toolbar"
-                onChange = { handleChange } ref = { componentRef }
+                onChange = { handleChange }
                 // onChange={props.change} // value = { data } // input = 'react-trix-editor'
                 // autoFocus={true} // default={props.default}
             />
 
-            {/* <div className = "code">
-                <textarea id = "code" >
-                    <h1>Hello</h1>
-                </textarea>
-            </div> */}
+            <div id = "codeDiv" className = "codeDiv">
+                <div className = "codeTop">
+                    JS code editor
+                </div>
+                <CodeEditor
+                    height="30vh"
+                    defaultLanguage="javascript"
+                    theme="vs-dark"
+                    defaultValue='let a = "3";
+                    console.log(a);'
+                    onChange= {(value) => setData(value)}
+                    //  onChange = { handleChange }  // Skriver ut datan = koden i text editor (gör inget- syns inte? Jo, för socket skriv ut i code editor)
+                />
 
-            {/* new EditorView({
-                doc: "console.log('hello')\n",
-                extensions: [basicSetup, javascript()],
-                parent: document.body
-                }) */}
+                <button className = "button trixButton" onClick = {()=> execute() }> Execute </button>
 
-
+                <div className = "codeTop">
+                    Result terminal
+                </div>
+                <div id = "code-editor" className = "code code-editor">
+                </div>
+            </div>
 
              </>
              : 
@@ -330,7 +422,7 @@ const Editor = () => {
             } 
         </div>
     )
-}
+} 
 
 export default Editor
 

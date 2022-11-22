@@ -15,7 +15,8 @@ let sendToSocket = true;
 
 const Editor = () => {
     let updateCurrentDocOnChange;
-    const componentRef = useRef();
+    const textRef = useRef();
+    const codeRef = useRef();
     const [data, setData] = useState('');
     const [docType, setDocType] = useState('text');
     const [docs, setDocs] = useState([]);
@@ -100,7 +101,6 @@ const Editor = () => {
     const editorDidMount = (editor) => {
         const editorModel = editor.getModel();
 
-        // setEditorMounted(true);
         setEditorModel(editorModel);
     };
 
@@ -126,16 +126,18 @@ const Editor = () => {
             } 
 
             if (docType === "code") {
+                console.log("code");
                 hideTrixEditor();
                 showCodeDiv();
 
-                let element = document.getElementsByClassName("code-editor")[0];
+                // let element = document.getElementsByClassName("code-editor")[0];
 
-                if (element) {
-                    if (editorModel) {
-                        editorModel.setValue(content);
-                    }
-                }
+                // if (element) {
+                    // if (editorModel) {
+                        // console.log(content);
+                        // editorModel.setValue(content);
+                    // }
+                // }
             }
         }
         }
@@ -162,6 +164,7 @@ const Editor = () => {
 
     function handleCodeChange(value) {
         setCodeData(value);
+        setData(value);
     }
 
     let handleSelectedDoc = () => {
@@ -195,7 +198,6 @@ const Editor = () => {
         // Visa formuläret med CSS
         document.getElementById("codeDiv").style.display = "block";
     };
-
 
     const hideCodeDiv = () => {
         // Dölj formuläret med CSS
@@ -256,7 +258,7 @@ const Editor = () => {
     
                 let sendInvite = window.confirm(`Do you want to send an invitation to ` + email + `?`);
     
-                // Maila ut inbjudan till användaren?
+                // Maila ut inbjudan till användaren
                 if (sendInvite === true ) {
                     sendEmail(email);
                 }
@@ -284,8 +286,8 @@ const Editor = () => {
     const create = async (event) => {
         event.preventDefault();
 
-        hideCodeDiv();
-        showTrixEditor();
+        // hideCodeDiv();
+        // showTrixEditor();
 
         let newName = document.getElementById("fileName").value;
         let newDoc = {};
@@ -333,11 +335,6 @@ const Editor = () => {
         setAppUsers(users);
     };
 
-    const generatePDF = useReactToPrint({
-        content: () => componentRef.current,
-        copyStyles: false
-    });
-
     async function invite() {
         let email = prompt("Enter email of user to invite: ");
 
@@ -382,6 +379,30 @@ const Editor = () => {
         console.log("comment");
     }
 
+    const printText = useReactToPrint(
+            {
+            content: () => textRef.current,
+            copyStyles: false
+            }
+    );
+
+    const printCode = useReactToPrint(
+        {
+      content: () => codeRef.current,
+      copyStyles: true
+        }
+    );
+
+    function handlePrint() {
+        if (docType === "text") {
+            printText();
+        }
+
+        if (docType === "code") {
+            printCode();
+        }
+    }
+
     return (
         <div className = "editor">
             { token ?
@@ -421,7 +442,8 @@ const Editor = () => {
                 <h2>"Users not found"</h2>
                 }
 
-                <button className = "button trixButton" onClick = {()=> generatePDF() }> Print </button>
+                {/* <button className = "button trixButton" onClick = {()=> generatePDF() }> Print </button> */}
+                <button className = "button trixButton" onClick = { handlePrint }> Print </button>
 
                 <button className = "button trixButton" onClick = {()=> comment() }> Comment </button>
 
@@ -432,7 +454,6 @@ const Editor = () => {
                 <button className = "button trixButton" onClick = {()=> logout() }> Log out </button>
 
             </trix-toolbar>
-
             <form className = "saveForm" id = "saveForm"  style = {{ display: "none" }}> Name of file:
                 
                 <input className = "button" id = "fileName" type = "text" required >
@@ -442,48 +463,60 @@ const Editor = () => {
 
                 <button className = "button" onClick = { (event) => { exitCreateDoc(event); } }> Exit </button>
             </form>
+            <TrixEditor id = "trixEditorContent" className = "trix-editor" toolbar = "trix-toolbar" ref={textRef}
+            onChange = { handleChange }
+            // onChange={props.change} // value = { data } // input = 'react-trix-editor'
+            // autoFocus={true} // default={props.default}
+            />
 
-                    <TrixEditor id = "trixEditorContent" className = "trix-editor" toolbar = "trix-toolbar"
-                    onChange = { handleChange }
-                    // onChange={props.change} // value = { data } // input = 'react-trix-editor'
-                    // autoFocus={true} // default={props.default}
-                    />
+            <div id = "codeDiv" className = "codeDiv" style = {{ display: "none" }} >
 
-            <div id = "codeDiv" className = "codeDiv" style = {{ display: "none" }}>
-                <div className = "codeTop">
+
+
+
+
+
+
+                <div className = "codeTop" >
                     JS code editor
                 </div>
-
+                <div ref={codeRef}>
                     <CodeEditor
                         id = "code-editor" 
-                        className = "sl-form-row-elt-width-stretch code-editor"
+                        className = "code-editor"
                         height="30vh"
                         defaultLanguage="javascript"
                         theme="vs-dark"
-                        // defaultValue="let a = 3;
-                            // let b = 4;
-                            // console.log(a*b);"
+                        // defaultValue="let a = 3;\n let b = 4;\n console.log(a*b);"
                         onChange = { (value) => {handleChange(); handleCodeChange(value);} }
                         editorDidMount = { editorDidMount }
-                        onMount = {editorDidMount}
+                        onMount = { editorDidMount }
+                        value = { data }
                     />
-
+                </div>
+                    {/* value(newVal) {
+                        if (newVal !== this.editor.getValue()) {
+                            this.editor.setValue(newVal)
+                        } */}
+                        {/* }, */}
 
 
                 {/* Ska fungera med sockets
 
-                 Läs in code dokument i editorn
+                Läs in fil
 
-                // Spara resultat i databasen... - görs auto eftersom setData?  */}
+                // Spara resultat i databasen...  */}
+
+
+
+
+
+
+
 
                 <button className = "button trixButton executeButton" onClick = {()=> execute() }> Execute </button>
-
-                <div className = "codeTop">
-                    Result terminal
-                </div>
-                <div id = "code-terminal" className = "code code-terminal">
-                </div>
-
+                <div className = "codeTop"> Result terminal </div>
+                <div id = "code-terminal" className = "code code-terminal"> </div>
                 <button className = "button trixButton executeButton" onClick = {()=> text() }> Return to text mode </button>
             </div>
 

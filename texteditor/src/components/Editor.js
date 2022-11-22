@@ -16,8 +16,8 @@ let sendToSocket = true;
 const Editor = () => {
     let updateCurrentDocOnChange;
     const componentRef = useRef();
-    const codeRef = useRef();
     const [data, setData] = useState('');
+    const [docType, setDocType] = useState('text');
     const [docs, setDocs] = useState([]);
     const [currentDoc, setCurrentDoc] = useState({});
     const [selectedDoc, setSelectedDoc] = useState(""); // id på valt objekt
@@ -27,6 +27,8 @@ const Editor = () => {
     const [appUsers, setAppUsers] = useState([]);
     const [codeData, setCodeData] = useState('');
     const [codeResult, setCodeResult] = useState('');
+    // const [editorMounted, setEditorMounted] = useState(false);
+    const [editorModel, setEditorModel] = useState("");
 
     // Hämta alla dokument
     useEffect(() => {
@@ -62,9 +64,9 @@ const Editor = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data]);
 
-    // Skriver ut innehållet i kod-editorn när data ändras
+    // Skriver ut innehållet i kod-terminalen när data ändras
     useEffect(() => {
-        setCodeEditorContent(codeResult, false);
+        setCodeTerminalContent(codeResult);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [codeResult]);
 
@@ -94,33 +96,57 @@ const Editor = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentDoc]); // Gör en emit om INNEHÅLLET i currentDoc ändras
 
-    function setEditorContent(content, triggerChange) {
-        let element = document.querySelector("trix-editor");
 
-        if (element) {
-            updateCurrentDocOnChange = triggerChange;
-            element.value = "";
-            element.editor.setSelectedRange([0, 0]); //
-            updateCurrentDocOnChange = triggerChange;
-            element.editor.insertHTML(content);
+    const editorDidMount = (editor) => {
+        const editorModel = editor.getModel();
+
+        // setEditorMounted(true);
+        setEditorModel(editorModel);
+    };
+
+    async function setEditorContent(content, triggerChange) {
+        if (document.getElementById("selectDoc")) {
+            let docId = document.getElementById("selectDoc").value; // 0, 1, 2
+            if (docId !== "-99" && docs[docId]) {
+                let doc = docs[docId];
+                let docType = doc.docType;
+
+            if (docType === "text") {
+                hideCodeDiv();
+                showTrixEditor();
+
+                let element = document.querySelector("trix-editor");
+                if (element) {
+                    updateCurrentDocOnChange = triggerChange;
+                    element.value = "";
+                    element.editor.setSelectedRange([0, 0]); //
+                    updateCurrentDocOnChange = triggerChange;
+                    element.editor.insertHTML(content);
+                }
+            } 
+
+            if (docType === "code") {
+                hideTrixEditor();
+                showCodeDiv();
+
+                let element = document.getElementsByClassName("code-editor")[0];
+
+                if (element) {
+                    if (editorModel) {
+                        editorModel.setValue(content);
+                    }
+                }
+            }
+        }
         }
     };
 
-    function setCodeEditorContent(content, triggerChange) {
-        // let element = document.querySelector("trix-editor");
-        let element = document.getElementById("code-editor");
-        // console.log(element);
-        // console.log(element2);
-
+    function setCodeTerminalContent(codeResult) {
+        let element = document.getElementById("code-terminal");
         if (element) {
-            updateCurrentDocOnChange = triggerChange;
             element.value = "";
-            // element.setSelectedRange([0, 0]); //
-            updateCurrentDocOnChange = triggerChange;
-            element.innerHTML = content;
+            element.innerHTML = codeResult;
         }
-
-        // codeRef.insertHTML(decodedResult);
     };
 
     function handleChange (html, text) { // html = event
@@ -134,6 +160,10 @@ const Editor = () => {
         updateCurrentDocOnChange = true;
     };
 
+    function handleCodeChange(value) {
+        setCodeData(value);
+    }
+
     let handleSelectedDoc = () => {
         // Hämta värde ur selectlista
         let docId = document.getElementById("selectDoc").value; // 0, 1, 2
@@ -143,6 +173,7 @@ const Editor = () => {
             setSelectedDoc(doc["_id"]); // 6140s3f01sd - Ett id  1 currentDoc och selectedDoc sätts
             setCurrentDoc(doc); // Ett objekt
             setData(doc.html);
+            setDocType(doc.docType);
         }
      };
 
@@ -173,14 +204,38 @@ const Editor = () => {
 
     const showTrixEditor = () => {
         // Visa formuläret med CSS
-        document.getElementById("trixEditorContent").style.display = "block";
+        document.getElementsByClassName("trix-editor")[0].style.display = "block";
     };
-
 
     const hideTrixEditor = () => {
         // Dölj formuläret med CSS
-        document.getElementById("trixEditorContent").style.display = "none";
+        document.getElementsByClassName("trix-editor")[0].style.display = "none";
     };
+
+    function code() {
+        hideSaveForm();
+        hideTrixEditor();
+        showCodeDiv();
+        createReset();
+        setDocType("code");
+
+        // Sätt innehållet i kod-editorn till tomt
+        let element = document.getElementsByClassName("code-editor")[0];
+
+        if (element) {
+            if (editorModel) {
+                editorModel.setValue("");
+            }
+        }
+    }
+
+    function text() {
+        hideSaveForm();
+        hideCodeDiv();
+        showTrixEditor();
+        createReset();
+        setDocType("text");
+    }
 
     function showAddEditorButton() {
         // Visa knappen med CSS
@@ -229,12 +284,21 @@ const Editor = () => {
     const create = async (event) => {
         event.preventDefault();
 
+        hideCodeDiv();
+        showTrixEditor();
+
         let newName = document.getElementById("fileName").value;
         let newDoc = {};
 
-        newDoc.html = currentDoc.html;
+        if (currentDoc.html) {
+            newDoc.html = currentDoc.html;
+        } else {
+            newDoc.html = codeData;
+        }
+
         newDoc.name = newName;
-        newDoc.type = "text";
+        newDoc.docType = docType;
+        console.log(newDoc);
 
         if (newDoc.name === null || newDoc.name === "" || newDoc.name === undefined) {
             alert("Document must have a title");
@@ -297,6 +361,7 @@ const Editor = () => {
         let buff = Buffer.from(codeData, 'utf-8');
         // decode buffer as Base64
         let encodedData = buff.toString('base64');
+        console.log(encodedData)
         let data = {
             code: encodedData
 
@@ -311,20 +376,11 @@ const Editor = () => {
         let decodedResult = buff.toString('utf-8');
 
         setCodeResult(decodedResult);
-
-
-        // Fel med codeResult i st för Data om ska fungera med sockets?
-
-        // Spara resultat i databasen....
-
-        // Lägg till code-typ på dokumentet
-
-        // Toggle Code-knappen
-
-        // Göm/ visa texteditor/ codeeditor
-
-        // Sätt samtidigt värdet på type till ena eller andra
     };
+
+    function comment() {
+        console.log("comment");
+    }
 
     return (
         <div className = "editor">
@@ -367,11 +423,11 @@ const Editor = () => {
 
                 <button className = "button trixButton" onClick = {()=> generatePDF() }> Print </button>
 
-                <button className = "button trixButton" onClick = {()=> logout() }> Comment </button>
+                <button className = "button trixButton" onClick = {()=> comment() }> Comment </button>
 
                 <button className = "button trixButton" onClick = {()=> invite() }> Invite </button>
 
-                <button className = "button trixButton" onClick = {()=> { hideTrixEditor(); showCodeDiv();} }> Code </button>
+                <button className = "button trixButton" onClick = {()=> code() }> Code </button>
 
                 <button className = "button trixButton" onClick = {()=> logout() }> Log out </button>
 
@@ -387,33 +443,48 @@ const Editor = () => {
                 <button className = "button" onClick = { (event) => { exitCreateDoc(event); } }> Exit </button>
             </form>
 
-            <TrixEditor id = "trixEditorContent" className = "trix-editor" toolbar = "trix-toolbar"
-                onChange = { handleChange }
-                // onChange={props.change} // value = { data } // input = 'react-trix-editor'
-                // autoFocus={true} // default={props.default}
-            />
+                    <TrixEditor id = "trixEditorContent" className = "trix-editor" toolbar = "trix-toolbar"
+                    onChange = { handleChange }
+                    // onChange={props.change} // value = { data } // input = 'react-trix-editor'
+                    // autoFocus={true} // default={props.default}
+                    />
 
-            <div id = "codeDiv" className = "codeDiv">
+            <div id = "codeDiv" className = "codeDiv" style = {{ display: "none" }}>
                 <div className = "codeTop">
                     JS code editor
                 </div>
-                <CodeEditor
-                    height="30vh"
-                    defaultLanguage="javascript"
-                    theme="vs-dark"
-                    defaultValue='let a = "3";
-                    console.log(a);'
-                    onChange= {(value) => setData(value)}
-                    //  onChange = { handleChange }  // Skriver ut datan = koden i text editor (gör inget- syns inte? Jo, för socket skriv ut i code editor)
-                />
 
-                <button className = "button trixButton" onClick = {()=> execute() }> Execute </button>
+                    <CodeEditor
+                        id = "code-editor" 
+                        className = "sl-form-row-elt-width-stretch code-editor"
+                        height="30vh"
+                        defaultLanguage="javascript"
+                        theme="vs-dark"
+                        // defaultValue="let a = 3;
+                            // let b = 4;
+                            // console.log(a*b);"
+                        onChange = { (value) => {handleChange(); handleCodeChange(value);} }
+                        editorDidMount = { editorDidMount }
+                        onMount = {editorDidMount}
+                    />
+
+
+
+                {/* Ska fungera med sockets
+
+                 Läs in code dokument i editorn
+
+                // Spara resultat i databasen... - görs auto eftersom setData?  */}
+
+                <button className = "button trixButton executeButton" onClick = {()=> execute() }> Execute </button>
 
                 <div className = "codeTop">
                     Result terminal
                 </div>
-                <div id = "code-editor" className = "code code-editor">
+                <div id = "code-terminal" className = "code code-terminal">
                 </div>
+
+                <button className = "button trixButton executeButton" onClick = {()=> text() }> Return to text mode </button>
             </div>
 
              </>

@@ -4,67 +4,73 @@ import { render, fireEvent, screen } from '@testing-library/react';
 // import ReactDOM from 'react-dom';
 import App from './App';
 
-test('button with name Update should exist', () => {
-    render(<App />);
 
-    // const container = document.getElementById("root");
-    // const root = createRoot(container);
-    // root.render(<App tab="home" />);
-
-    const button = screen.getByRole("button", {name: 'Update'})
-
-    expect(button).toBeInTheDocument();
-});
-
-test('button with name Create new should exist', () => {
+test('button with name Login should exist', () => {
   render(<App />);
 
-  const button = screen.getByRole("button", {name: 'Create new'})
+  const button = screen.getByRole("button", {name: 'Log in'})
 
   expect(button).toBeInTheDocument();
 });
 
-test('select list should exist', () => {
-  render(<App />);
 
-  const selectList = screen.getByRole("option")
+// test('button with name Update should exist', () => {
+//     render(<App />);
 
-  expect(selectList).toBeInTheDocument();
+//     const button = screen.getByRole("button", {name: 'Update'})
 
-});
+//     expect(button).toBeInTheDocument();
+// });
 
-// Användaren ska kunna se en textbox när den tryckt på 'Create new'
-test('textbox should appear when button Create new is pressed', () => {
-  render(<App />);
+// test('button with name Create should exist', () => {
+//   render(<App />);
 
-  const button = screen.getByRole("button", {name: 'Create new'});
-  fireEvent.click(button);
-  const textbox = screen.getByRole("textbox");
+//   const button = screen.getByRole("button", {name: 'Create'})
 
-  expect(textbox).toBeInTheDocument();
-});
+//   expect(button).toBeInTheDocument();
+// });
 
-// Användaren ska kunna se texten "Name of file" efter att ha tryckt på 'Create new'
-test('Text Name of file should appear when button Create new is pressed', () => {
-  render(<App />);
+// test('select list should exist', () => {
+//   render(<App />);
 
-  const button = screen.getByRole("button", {name: 'Create new'});
-  fireEvent.click(button);
-  const text = screen.getByText(/Name of file/i);
+//   const selectList = screen.getByRole("option")
 
-  expect(text).toBeInTheDocument();
-});
+//   expect(selectList).toBeInTheDocument();
 
-// Användaren ska kunna se en knapp med namn 'Save' när den tryckt på 'Create new'
-test('Button Save should appear after button Create new is pressed', () => {
-  render(<App />);
+// });
 
-  const createNewButton = screen.getByRole("button", {name: 'Create new'});
-  fireEvent.click(createNewButton);
-  const saveButton = screen.getByRole("button", {name: 'Save'});
+// // Användaren ska kunna se en textbox när den tryckt på 'Create new'
+// test('textbox should appear when button Create is pressed', () => {
+//   render(<App />);
+
+//   const button = screen.getByRole("button", {name: 'Create'});
+//   fireEvent.click(button);
+//   const textbox = screen.getByRole("textbox");
+
+//   expect(textbox).toBeInTheDocument();
+// });
+
+// // Användaren ska kunna se texten "Name of file" efter att ha tryckt på 'Create new'
+// test('Text Name of file should appear when button Create is pressed', () => {
+//   render(<App />);
+
+//   const button = screen.getByRole("button", {name: 'Create'});
+//   fireEvent.click(button);
+//   const text = screen.getByText(/Name of file/i);
+
+//   expect(text).toBeInTheDocument();
+// });
+
+// // Användaren ska kunna se en knapp med namn 'Save' när den tryckt på 'Create new'
+// test('Button Save should appear after button Create is pressed', () => {
+//   render(<App />);
+
+//   const createNewButton = screen.getByRole("button", {name: 'Create'});
+//   fireEvent.click(createNewButton);
+//   const saveButton = screen.getByRole("button", {name: 'Save'});
  
-  expect(saveButton).toBeInTheDocument();
-});
+//   expect(saveButton).toBeInTheDocument();
+// });
 
 // Användaren ska kunna skriva text i trix editor och sen se att textboxen har det värdet?
 // test('Button Save should appear after button Create new is pressed', () => {

@@ -6,11 +6,11 @@ import { io } from "socket.io-client";
 // import "trix";
 import docsModel from '../models/docsModel';
 import authModel from '../models/auth';
-// import Login from "./components/Login";
 import Login from "./Login";
 import {useReactToPrint} from 'react-to-print';
 import CodeEditor from "@monaco-editor/react";
-var Buffer = require('buffer/').Buffer
+// let Buffer = require('buffer/').Buffer
+import {Buffer} from 'buffer';
 let sendToSocket = true;
 
 const Editor = () => {
@@ -28,8 +28,9 @@ const Editor = () => {
     const [appUsers, setAppUsers] = useState([]);
     const [codeData, setCodeData] = useState('');
     const [codeResult, setCodeResult] = useState('');
-    // const [editorMounted, setEditorMounted] = useState(false);
     const [editorModel, setEditorModel] = useState("");
+    // const [codeChange, setCodeChange] = useState('');
+
 
     // Hämta alla dokument
     useEffect(() => {
@@ -65,6 +66,12 @@ const Editor = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data]);
 
+    // // När ändringar gjorts i code-editorn 
+    // useEffect(() => {
+    //     handleCodeChange(codeData);
+    //     // eslint-disable-next-line react-hooks/exhaustive-deps
+    // }, [codeData]);
+
     // Skriver ut innehållet i kod-terminalen när data ändras
     useEffect(() => {
         setCodeTerminalContent(codeResult);
@@ -78,9 +85,11 @@ const Editor = () => {
 
     // Varje gång det ändras i en socket
     useEffect(() => {
+        console.log("socket rec");
         if (socket) {
             socket.on('changedText', (doc) => {
                 // console.log("3 received in clients", doc);
+                console.log("3 received in clients");
                 sendToSocket = false;
                 setEditorContent(doc.html, false);
             });
@@ -91,12 +100,12 @@ const Editor = () => {
     useEffect(() => {
         if (socket && sendToSocket) {
             // console.log("1 emit from client", currentDoc);
+            console.log("1 emit from client");
             socket.emit("changedText", currentDoc);
         }
         sendToSocket = true;
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentDoc]); // Gör en emit om INNEHÅLLET i currentDoc ändras
-
 
     const editorDidMount = (editor) => {
         const editorModel = editor.getModel();
@@ -111,35 +120,31 @@ const Editor = () => {
                 let doc = docs[docId];
                 let docType = doc.docType;
 
-            if (docType === "text") {
-                hideCodeDiv();
-                showTrixEditor();
+                if (docType === "text") {
+                    hideCodeDiv();
+                    showTrixEditor();
 
-                let element = document.querySelector("trix-editor");
-                if (element) {
-                    updateCurrentDocOnChange = triggerChange;
-                    element.value = "";
-                    element.editor.setSelectedRange([0, 0]); //
-                    updateCurrentDocOnChange = triggerChange;
-                    element.editor.insertHTML(content);
+                    let element = document.querySelector("trix-editor");
+                    if (element) {
+                        updateCurrentDocOnChange = triggerChange;
+                        element.value = "";
+                        element.editor.setSelectedRange([0, 0]); //
+                        updateCurrentDocOnChange = triggerChange;
+                        element.editor.insertHTML(content);
+                    }
+                } 
+
+                if (docType === "code") {
+                    hideTrixEditor();
+                    showCodeDiv();
+
+                    let element = document.getElementsByClassName("code-editor")[0];
+
+                    if (element && editorModel) {
+                        editorModel.setValue(content);
+                    }
                 }
-            } 
-
-            if (docType === "code") {
-                console.log("code");
-                hideTrixEditor();
-                showCodeDiv();
-
-                // let element = document.getElementsByClassName("code-editor")[0];
-
-                // if (element) {
-                    // if (editorModel) {
-                        // console.log(content);
-                        // editorModel.setValue(content);
-                    // }
-                // }
             }
-        }
         }
     };
 
@@ -162,11 +167,6 @@ const Editor = () => {
         updateCurrentDocOnChange = true;
     };
 
-    function handleCodeChange(value) {
-        setCodeData(value);
-        setData(value);
-    }
-
     let handleSelectedDoc = () => {
         // Hämta värde ur selectlista
         let docId = document.getElementById("selectDoc").value; // 0, 1, 2
@@ -176,6 +176,7 @@ const Editor = () => {
             setSelectedDoc(doc["_id"]); // 6140s3f01sd - Ett id  1 currentDoc och selectedDoc sätts
             setCurrentDoc(doc); // Ett objekt
             setData(doc.html);
+            setCodeData(doc.html); ////
             setDocType(doc.docType);
         }
      };
@@ -281,6 +282,7 @@ const Editor = () => {
         setCurrentDoc({});
         setSelectedDoc({});
         setData("");
+        setCodeData(""); ////
     };
 
     const create = async (event) => {
@@ -488,24 +490,17 @@ const Editor = () => {
                         defaultLanguage="javascript"
                         theme="vs-dark"
                         // defaultValue="let a = 3;\n let b = 4;\n console.log(a*b);"
-                        onChange = { (value) => {handleChange(); handleCodeChange(value);} }
+                        onChange = { (value) => {handleChange(); setCodeData(value); setData(value); } }
                         editorDidMount = { editorDidMount }
-                        onMount = { editorDidMount }
+                        // onMount = { editorDidMount }
                         value = { data }
                     />
                 </div>
-                    {/* value(newVal) {
-                        if (newVal !== this.editor.getValue()) {
-                            this.editor.setValue(newVal)
-                        } */}
-                        {/* }, */}
 
 
                 {/* Ska fungera med sockets
 
-                Läs in fil
-
-                // Spara resultat i databasen...  */}
+                Set editor content  */}
 
 
 

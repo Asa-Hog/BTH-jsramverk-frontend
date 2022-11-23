@@ -7,10 +7,10 @@ import { io } from "socket.io-client";
 import docsModel from '../models/docsModel';
 import authModel from '../models/auth';
 import Login from "./Login";
-import {useReactToPrint} from 'react-to-print';
+import { useReactToPrint } from 'react-to-print';
 import CodeEditor from "@monaco-editor/react";
 // let Buffer = require('buffer/').Buffer
-import {Buffer} from 'buffer';
+import { Buffer } from 'buffer';
 let sendToSocket = true;
 
 const Editor = () => {
@@ -30,7 +30,6 @@ const Editor = () => {
     const [codeResult, setCodeResult] = useState('');
     const [editorModel, setEditorModel] = useState("");
     const [valueChange, setValueChange] = useState('');
-
 
     // Hämta alla dokument
     useEffect(() => {
@@ -68,7 +67,7 @@ const Editor = () => {
 
     // Skriver ut innehållet i kod-editorn när data ändras
     useEffect(() => {
-        setData(valueChange);
+        // setData(valueChange);
         currentDoc.html = valueChange;
 
         // När det gjorts ändring i code-editorn skickar jag datan via sockets
@@ -389,10 +388,10 @@ const Editor = () => {
     }
 
     const printText = useReactToPrint(
-            {
-            content: () => textRef.current,
-            copyStyles: false
-            }
+        {
+        content: () => textRef.current,
+        copyStyles: false
+        }
     );
 
     const printCode = useReactToPrint(
@@ -490,7 +489,7 @@ const Editor = () => {
                         defaultLanguage="javascript"
                         theme="vs-dark"
                         // defaultValue="let a = 3;\n let b = 4;\n console.log(a*b);"
-                        onChange = { (value) => {handleChange(); setCodeData(value); setData(value); setValueChange(value);} }
+                        onChange = { (value) => {handleChange(); setValueChange(value);} } // setCodeData(value); setData(value);
                         editorDidMount = { editorDidMount }
                         // onMount = { editorDidMount }
                         value = { data }

@@ -29,7 +29,7 @@ const Editor = () => {
     const [codeData, setCodeData] = useState('');
     const [codeResult, setCodeResult] = useState('');
     const [editorModel, setEditorModel] = useState("");
-    // const [codeChange, setCodeChange] = useState('');
+    const [valueChange, setValueChange] = useState('');
 
 
     // Hämta alla dokument
@@ -64,13 +64,21 @@ const Editor = () => {
     useEffect(() => {
         setEditorContent(data, false);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [data]);
+    }, [data]); //
 
-    // // När ändringar gjorts i code-editorn 
-    // useEffect(() => {
-    //     handleCodeChange(codeData);
-    //     // eslint-disable-next-line react-hooks/exhaustive-deps
-    // }, [codeData]);
+    // Skriver ut innehållet i kod-editorn när data ändras
+    useEffect(() => {
+        setData(valueChange);
+        currentDoc.html = valueChange;
+
+        // När det gjorts ändring i code-editorn skickar jag datan via sockets
+        if (socket && sendToSocket) {
+            // console.log("1b emit from client", currentDoc);
+            socket.emit("changedText", currentDoc);
+        }
+        sendToSocket = true;
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [valueChange]); //
 
     // Skriver ut innehållet i kod-terminalen när data ändras
     useEffect(() => {
@@ -85,13 +93,13 @@ const Editor = () => {
 
     // Varje gång det ändras i en socket
     useEffect(() => {
-        console.log("socket rec");
         if (socket) {
             socket.on('changedText', (doc) => {
                 // console.log("3 received in clients", doc);
-                console.log("3 received in clients");
                 sendToSocket = false;
                 setEditorContent(doc.html, false);
+
+                setData(doc.html); /////
             });
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -100,7 +108,6 @@ const Editor = () => {
     useEffect(() => {
         if (socket && sendToSocket) {
             // console.log("1 emit from client", currentDoc);
-            console.log("1 emit from client");
             socket.emit("changedText", currentDoc);
         }
         sendToSocket = true;
@@ -138,11 +145,15 @@ const Editor = () => {
                     hideTrixEditor();
                     showCodeDiv();
 
-                    let element = document.getElementsByClassName("code-editor")[0];
+                    // Inget skrivs ut i kod-editorn härifrån, utan innehållet där sätts efter vad värdet på variabeln data är
 
-                    if (element && editorModel) {
-                        editorModel.setValue(content);
-                    }
+                //     let element = document.getElementsByClassName("code-editor")[0];
+                //     if (element && editorModel) {
+                //         console.log("ga");
+                //         let value = editorModel.getValue();
+                //         console.log(value);
+                //         editorModel.setValue(content);
+                //     }
                 }
             }
         }
@@ -288,9 +299,6 @@ const Editor = () => {
     const create = async (event) => {
         event.preventDefault();
 
-        // hideCodeDiv();
-        // showTrixEditor();
-
         let newName = document.getElementById("fileName").value;
         let newDoc = {};
 
@@ -302,7 +310,7 @@ const Editor = () => {
 
         newDoc.name = newName;
         newDoc.docType = docType;
-        console.log(newDoc);
+        // console.log(newDoc);
 
         if (newDoc.name === null || newDoc.name === "" || newDoc.name === undefined) {
             alert("Document must have a title");
@@ -354,16 +362,15 @@ const Editor = () => {
             setTimeout(function () {window.alert("Email sent.");}, 1000);
         }
     };
-    
+
     async function execute() {
         // create a buffer
         let buff = Buffer.from(codeData, 'utf-8');
         // decode buffer as Base64
         let encodedData = buff.toString('base64');
-        console.log(encodedData)
+
         let data = {
             code: encodedData
-
         };
 
         let res = await docsModel.execute(data);
@@ -472,13 +479,6 @@ const Editor = () => {
             />
 
             <div id = "codeDiv" className = "codeDiv" style = {{ display: "none" }} >
-
-
-
-
-
-
-
                 <div className = "codeTop" >
                     JS code editor
                 </div>
@@ -490,25 +490,12 @@ const Editor = () => {
                         defaultLanguage="javascript"
                         theme="vs-dark"
                         // defaultValue="let a = 3;\n let b = 4;\n console.log(a*b);"
-                        onChange = { (value) => {handleChange(); setCodeData(value); setData(value); } }
+                        onChange = { (value) => {handleChange(); setCodeData(value); setData(value); setValueChange(value);} }
                         editorDidMount = { editorDidMount }
                         // onMount = { editorDidMount }
                         value = { data }
                     />
                 </div>
-
-
-                {/* Ska fungera med sockets
-
-                Set editor content  */}
-
-
-
-
-
-
-
-
                 <button className = "button trixButton executeButton" onClick = {()=> execute() }> Execute </button>
                 <div className = "codeTop"> Result terminal </div>
                 <div id = "code-terminal" className = "code code-terminal"> </div>
@@ -525,11 +512,11 @@ const Editor = () => {
 
 export default Editor
 
-// Jag hade lite problem med att min markör hela tiden hoppade till slutet av min text i trixeditor i React när jag skrev i editorn efter att ha implementerat sockets. Det gjorde det svårt att ändra text "mitt i" ett textblock. Visade sig bero på att setEditorContent funktionen rensar editorn och lägger in nytt innehåll. Efter att ha pratat med @efo modifierade jag setEditorContent funktionen till följande (delar här om någon sitter med samma problem) vilket verkar fungera (markören "stannar" där den var): 
+// Jag hade lite problem med att min markör hela tiden hoppade till slutet av min text i trixeditor i React när jag skrev i editorn efter att ha implementerat sockets. Det gjorde det svårt att ändra text "mitt i" ett textblock. Visade sig bero på att setEdihtorContent funktionen rensar editorn och lägger in nytt innehåll. Efter att ha pratat med @efo modifierade jag setEdhitorContent funktionen till följande (delar här om någon sitter med samma problem) vilket verkar fungera (markören "stannar" där den var): 
 
 // const cursorPos = useRef([]);
 
-// function setEditorContent(content: string, triggerChange: boolean) {
+// function setEdhitorContent(content: string, triggerChange: boolean) {
 //         let element = document.querySelector("trix-editor") as any | null;
 
 //         updateCurrentDocOnChange = triggerChange;

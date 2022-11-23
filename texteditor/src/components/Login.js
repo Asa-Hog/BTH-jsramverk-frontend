@@ -41,10 +41,10 @@ export default function Login({setToken, setCurrentUser}) {
             <p className="loginP">Log in to access your account, or sign up today!</p>
 
             <div className = "loginForm">
-                <label className="loginLabel">Email</label>
-                <input className = "button loginbutton" type = "email" name = "email" onChange = { changeHandler } required/>
-                <label className="loginLabel">Password</label>
-                <input className = "button loginbutton" type = "password" name = "password"  onChange = { changeHandler }/>
+                <label className="loginLabel" htmlFor="email" >Email</label>
+                <input id = "email" className = "button loginbutton" type = "email" name = "email" onChange = { changeHandler } required/>
+                <label htmlFor="pwd" className="loginLabel">Password</label>
+                <input id = "pwd" className = "button loginbutton" type = "password" name = "password"  onChange = { changeHandler } />
 
                 <div className="loginButtonsDiv">
                     <button className = "button passwordButton" onClick = { login }> Log in </button>

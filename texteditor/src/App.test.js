@@ -1,17 +1,89 @@
 // import React from 'react';
-import { render, fireEvent, screen } from '@testing-library/react';
+import { render, fireEvent, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event'
+import { act } from 'react-dom/test-utils';
 // import { createRoot } from 'react-dom/client';
 // import ReactDOM from 'react-dom';
 import App from './App';
 
 
-test('button with name Login should exist', () => {
+test('button with name Log in should exist', () => {
   render(<App />);
 
   const button = screen.getByRole("button", {name: 'Log in'})
 
   expect(button).toBeInTheDocument();
 });
+
+test('button with name Sign up should exist', () => {
+  render(<App />);
+
+  const button = screen.getByRole("button", {name: 'Sign up'})
+
+  expect(button).toBeInTheDocument();
+});
+
+// Lo
+test('button with', () => {
+  render(<App />);
+
+  const emailArea = screen.getByRole("textbox")
+  // const pwdArea = screen.getByRole("button", {name: 'Sign up'})
+  // const registerButton = screen.getByRole("button", {name: 'Sign up'})
+
+  // fireEvent.click(registerButton)
+
+
+  // const updateButton = screen.getByRole("button", {name: 'Update'})
+
+  // expect(updateButton).toBeInTheDocument();
+  expect(emailArea).toBeInTheDocument();
+});
+
+// Logga in och testa sida 2
+test('button with name Update should exist after log in', async () => {
+  render(<App />);
+  // const emailField = screen.getByRole("input", {name: 'email'})
+  const emailField = getByLabelText("Email");
+  const pwdField = screen.getByRole("textbox", {name: 'pwd'})
+  const registerButton = screen.getByRole("button", {name: 'Sign up'})
+  const loginButton = screen.getByRole("button", {name: 'Log in'})
+  
+  userEvent.type(emailField, "test@test.com")
+  userEvent.type(pwdField, 123)
+
+  await act(async() => {
+    userEvent.click(registerButton)
+  })
+
+  await act(async() => {
+    userEvent.click(loginButton)
+  })
+
+  // await waitFor(() => expect(window.location.pathname).toBe("/"))
+
+  waitFor(() => {
+    const updateButton = screen.getByRole("button", { name: 'Update' })
+
+    expect(updateButton).toBeInTheDocument();
+  });
+
+
+
+
+});
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // test('button with name Update should exist', () => {

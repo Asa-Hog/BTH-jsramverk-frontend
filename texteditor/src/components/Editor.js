@@ -288,11 +288,15 @@ const Editor = () => {
     };
 
     const createReset = () => {
-        document.getElementById("selectDoc").value = "-99";
-        setCurrentDoc({});
-        setSelectedDoc({});
-        setData("");
-        setCodeData(""); ////
+        /////////Obs! Kolla att allt fungerar efter if tillagd - borde göra
+        if (document.getElementById("selectDoc")) {
+            document.getElementById("selectDoc").value = "-99";
+            setCurrentDoc({});
+            setSelectedDoc({});
+            setData("");
+            setCodeData(""); ////
+        }
+
     };
 
     const create = async (event) => {
@@ -325,16 +329,19 @@ const Editor = () => {
     };
 
     const update = async () => { 
-        // Hämta värde ur selectlistan. Om värdet är -99 har inget dokument valts
-        let docId = document.getElementById("selectDoc").value; // 0, 1, 2
+        /////////Obs! Kolla att allt fungerar efter if tillagd - borde göra
+        if (document.getElementById("selectDoc")) { ////
+            // Hämta värde ur selectlistan. Om värdet är -99 har inget dokument valts
+            let docId = document.getElementById("selectDoc").value; // 0, 1, 2
 
-        if (docId === "-99") {
-            alert("Please choose a document to update.");
-        } else {
-            let res = await docsModel.update(currentDoc);
+            if (docId === "-99") {
+                alert("Please choose a document to update.");
+            } else {
+                let res = await docsModel.update(currentDoc);
 
-            if (res.status === 200) {
-                alert("Document updated");
+                if (res.status === 200) {
+                    alert("Document updated");
+                }
             }
         }
     };
@@ -354,7 +361,8 @@ const Editor = () => {
         }
     };
 
-    const sendEmail = async (email) => {
+    async function sendEmail(email) {
+        //// Kolla att inget förstörts
         let res = await authModel.invite(email);
 
         if (res.status === 200 ) {
@@ -478,26 +486,31 @@ const Editor = () => {
             />
 
             <div id = "codeDiv" className = "codeDiv" style = {{ display: "none" }} >
-                <div className = "codeTop" >
-                    JS code editor
-                </div>
-                <div ref={codeRef}>
-                    <CodeEditor
-                        id = "code-editor" 
-                        className = "code-editor"
-                        height="30vh"
-                        defaultLanguage="javascript"
-                        theme="vs-dark"
-                        // defaultValue="let a = 3;\n let b = 4;\n console.log(a*b);"
-                        onChange = { (value) => {handleChange(); setValueChange(value);} } // setCodeData(value); setData(value);
-                        editorDidMount = { editorDidMount }
-                        // onMount = { editorDidMount }
-                        value = { data }
-                    />
+                <div className = "codeEditorDiv">
+                    <div className = "codeTop" >
+                        JS code editor
+                    </div>
+                    <div ref = { codeRef }>
+                        <CodeEditor
+                        aria-describedby="code-id-1"
+                            id = "code-editor" 
+                            className = "code-editor"
+                            height="30vh"
+                            defaultLanguage="javascript"
+                            theme="vs-dark"
+                            // defaultValue="let a = 3;\n let b = 4;\n console.log(a*b);"
+                            onChange = { (value) => {handleChange(); setValueChange(value);} } // setCodeData(value); setData(value);
+                            editorDidMount = { editorDidMount }
+                            // onMount = { editorDidMount }
+                            value = { data }
+                        />
+                    </div>
                 </div>
                 <button className = "button trixButton executeButton" onClick = {()=> execute() }> Execute </button>
-                <div className = "codeTop"> Result terminal </div>
-                <div id = "code-terminal" className = "code code-terminal"> </div>
+                <div className = "resultTermialDiv">
+                    <div className = "codeTop"> Result terminal </div>
+                    <div id = "code-terminal" className = "code code-terminal"> </div>
+                </div>
                 <button className = "button trixButton executeButton" onClick = {()=> text() }> Return to text mode </button>
             </div>
 

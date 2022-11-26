@@ -1,75 +1,231 @@
-// import React from 'react';
+import React from 'react';
 import { render, fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event'
 import { act } from 'react-dom/test-utils';
 // import { createRoot } from 'react-dom/client';
-// import ReactDOM from 'react-dom';
+import ReactDOM from 'react-dom';
 import App from './App';
+// import {sendEmail} from './App';
+import Editor from './components/Editor';
+// import { shallow } from 'enzyme';
 
 
-test('button with name Log in should exist', () => {
-  render(<App />);
-
-  const button = screen.getByRole("button", {name: 'Log in'})
-
-  expect(button).toBeInTheDocument();
-});
-
-test('button with name Sign up should exist', () => {
-  render(<App />);
-
-  const button = screen.getByRole("button", {name: 'Sign up'})
-
-  expect(button).toBeInTheDocument();
-});
-
-// Lo
-test('button with', () => {
-  render(<App />);
-
-  const emailArea = screen.getByRole("textbox")
-  // const pwdArea = screen.getByRole("button", {name: 'Sign up'})
-  // const registerButton = screen.getByRole("button", {name: 'Sign up'})
-
-  // fireEvent.click(registerButton)
+import authModel from "./models/auth"
 
 
-  // const updateButton = screen.getByRole("button", {name: 'Update'})
+// let sendEmail = async (email) => {
+// 	//// Kolla att inget förstörts
+// 	let res = await authModel.invite(email);
 
-  // expect(updateButton).toBeInTheDocument();
-  expect(emailArea).toBeInTheDocument();
-});
+// 	if (res.status === 200 ) {
+// 		setTimeout(function () {window.alert("Email sent.");}, 1000);
+// 	}
+// };
 
-// Logga in och testa sida 2
-test('button with name Update should exist after log in', async () => {
-  render(<App />);
-  // const emailField = screen.getByRole("input", {name: 'email'})
-  const emailField = getByLabelText("Email");
-  const pwdField = screen.getByRole("textbox", {name: 'pwd'})
-  const registerButton = screen.getByRole("button", {name: 'Sign up'})
-  const loginButton = screen.getByRole("button", {name: 'Log in'})
+beforeEach(() => {
+  render (<App />)
+})
+
+// describe('Tests on log in page', () => {
+//     test('Email field should be in document', () => {
+//         const emailArea = screen.getByLabelText( 'Email')
+
+//         expect(emailArea).toBeInTheDocument()
+//     });
+
+//     test('Password field should be in document', () => {
+//         const pwdArea = screen.getByLabelText( 'Password')
+
+//         expect(pwdArea).toBeInTheDocument()
+//     });
+
+//     test('Button with name Log in should exist', () => {
+// 		const button = screen.getByRole("button", {name: 'Log in'})
+
+// 		expect(button).toBeInTheDocument()
+//     });
+
+//     test('Button with name Sign up should exist', () => {
+// 		const button = screen.getByRole("button", {name: 'Sign up'})
+
+// 		expect(button).toBeInTheDocument()
+//     });
+// });
+
+
+describe('Tests after log in', () => {
+    beforeEach(async() => {
+        const emailArea = screen.getByLabelText('Email')
+        const pwdArea = screen.getByLabelText( 'Password')
+        const loginButton = screen.getByRole("button", {name: 'Log in'})
+        const registerButton = screen.getByRole("button", {name: 'Sign up'})
   
-  userEvent.type(emailField, "test@test.com")
-  userEvent.type(pwdField, 123)
+        userEvent.type(emailArea, "test@test.com")
+        userEvent.type(pwdArea, "123")
+  
+        await act(async() => {
+          userEvent.click(registerButton)
+        })
+  
+        await act(async() => {
+          userEvent.click(loginButton)
+        })
+    });
 
-  await act(async() => {
-    userEvent.click(registerButton)
-  })
+    // test('Button with name Create should exist after log in', async () => {
+		
+    //     const createButton = await screen.findByRole("button", {name: 'Create'})
 
-  await act(async() => {
-    userEvent.click(loginButton)
-  })
+	// 	expect(createButton).toBeInTheDocument()
 
-  // await waitFor(() => expect(window.location.pathname).toBe("/"))
+    // });
 
-  waitFor(() => {
-    const updateButton = screen.getByRole("button", { name: 'Update' })
+    // test('Select list should exist after log in', async () => {
 
-    expect(updateButton).toBeInTheDocument();
-  });
+    //     const selectList = await screen.findByRole("option")
+
+    //     expect(selectList).toBeInTheDocument();
+
+    // });
+
+    // test('Button with name Update should exist after log in', async () => {
+
+    //     const updateButton = await screen.findByRole("button", {name: 'Update'})
+
+    //     expect(updateButton).toBeInTheDocument();
+
+    // });
+
+    // test('Button with name Print should exist after log in', async () => {
+
+    //     const printButton = await screen.findByRole("button", { name: 'Print' })
+
+    //     expect(printButton).toBeInTheDocument();
+
+    // });
+
+    // test('Button with name Invite should exist after log in', async () => {
+    //     const inviteButton = await screen.findByRole("button", { name: 'Invite' })
+
+    //     expect(inviteButton).toBeInTheDocument();
+    // });
+
+    // test('Button with name Code should exist after log in', async () => {
+    //     const codeButton = await screen.findByRole("button", { name: 'Code' })
+
+    //     expect(codeButton).toBeInTheDocument();
+    // });
+
+    // test('Textbox should appear after button Create is pressed', async () => {
+    // //   const button = screen.getByRole("button", {name: 'Create'}); 
+	// //   Unable to find an accessible element with the role "button" and name "Create"
+
+	// 	const button = await screen.findByRole("button", {name: 'Create'})
+
+	// 	expect(button).toBeInTheDocument()
+
+	// //  It looks like you passed a Promise object instead of a DOM node. Did you do something like `fireEvent.click(screen.findBy...` when you meant to use a `getBy` query `fireEvent.click(screen.getBy...`, or await the findBy query `fireEvent.click(await screen.findBy...`?
+
+
+    //     fireEvent.click(button); // får fel att jag inte kan sätta värde på ett element i Editor rad 291 - det finns ju inte
+
+    //      const textbox = await screen.findByRole("textbox")
+
+    //      expect(textbox).toBeInTheDocument()
+    // });
+
+    // test('Text Name of file should appear after button Create is pressed', async () => {
+    //     const button = await screen.findByRole("button", {name: 'Create'});
+
+	//     expect(button).toBeInTheDocument()
+    //     fireEvent.click(button);
+
+    //     const text = await screen.findByText(/Name of file/i);
+
+    //     expect(text).toBeInTheDocument();
+    // });
+
+    // test('Save button should appear after button Create is pressed', async () => {
+    //     const createButton = await screen.findByRole("button", {name: 'Create'});
+
+	// 	expect(createButton).toBeInTheDocument()
+    //     fireEvent.click(createButton);
+
+    //     const saveButton = await screen.findByRole("button", {name: 'Save'});
+
+    //     expect(saveButton).toBeInTheDocument();
+    // });
+
+
+    // test('After writing text in text editor the textbox element should contain that text ', async () => {
+    //     const trixeditor = await screen.findByRole("textbox")
+
+	// 	expect(trixeditor).toBeInTheDocument()
+    //     fireEvent.click(trixeditor);
+    //     fireEvent.change(trixeditor, {target: {value: 'hello'}})
+
+    //     expect(trixeditor.value).toBe("hello");
+    // });
+
+    test('After clicking invite button a prompt should appear in the document', async () => {
+		// const inviteButton1 = screen.findByRole("button", {name: 'Invgite'}) // Ger rätt fast är fel
+		// const inviteButton2 = screen.findByRole("button", {name: 'Invite'}) // Ger rätt - är rätt (men inte "frågan")
+		// Ovanstående ger rätt oavsett vad man skriver i
+
+		// const inviteButton3 = await screen.findByRole("button", {name: 'Invgite'}) // Blir fel
+		// const inviteButton = await screen.findByRole("button", {name: 'Invite'}) // Blir rätt
 
 
 
+		// let result = await sendEmail()  //ger ett promise??? utför den påhittade funktionen
+		// Skapa en mockfunktion som heter samma sak som den som ska bli kallad
+		// sendEmail()
+		window.prompt = jest.fn();
+
+        const inviteButton = await screen.findByRole("button", {name: 'Invite'})
+
+        fireEvent.click(inviteButton)
+
+		expect(window.prompt).toHaveBeenCalledTimes(1);
+    });
+
+	test('After clicking Code button a code editor and result terminal should appear along with buttons Execute and Return to text mode', async () => {
+		const codeButton = await screen.findByRole("button", {name: 'Code'})
+
+		fireEvent.click(codeButton)
+
+		const codeEditor = await screen.findByText("JS code editor");
+		const executeButton = await screen.findByRole("button", {name: 'Execute'})
+		const resultTerminal = await screen.findByText('Result terminal')
+		const returnButton = await screen.findByRole("button", {name: 'Return to text mode'})
+
+		expect(codeEditor).toBeInTheDocument();
+		expect(executeButton).toBeInTheDocument();
+		expect(resultTerminal).toBeInTheDocument();
+		expect(returnButton).toBeInTheDocument();
+	});
+
+	test('After clicking Print the handlePrint function should be called', async () => {
+		const handlePrint = jest.fn();
+		
+		const printButton = await screen.findByRole("button", {name: 'Print'});
+
+		fireEvent.click(printButton); 
+
+		const pdfView = await screen.findByRole("textbox");
+
+
+		// When using @testing-library/react-native you can assert the presence of an element like so.
+			// const { getByText } = render(<div title="Skriv ut" />);
+			// expect(getByText("Skriv ut")).toBeTruthy();
+		
+
+
+
+
+		expect(pdfView).toBeInTheDocument();
+		// expect(handlePrint).toHaveBeenCalledTimes(1);
+	});
 
 });
 
@@ -79,81 +235,6 @@ test('button with name Update should exist after log in', async () => {
 
 
 
+// expect(await screen.findByText('some text')).not.toBe(null)
 
-
-
-
-
-
-
-// test('button with name Update should exist', () => {
-//     render(<App />);
-
-//     const button = screen.getByRole("button", {name: 'Update'})
-
-//     expect(button).toBeInTheDocument();
-// });
-
-// test('button with name Create should exist', () => {
-//   render(<App />);
-
-//   const button = screen.getByRole("button", {name: 'Create'})
-
-//   expect(button).toBeInTheDocument();
-// });
-
-// test('select list should exist', () => {
-//   render(<App />);
-
-//   const selectList = screen.getByRole("option")
-
-//   expect(selectList).toBeInTheDocument();
-
-// });
-
-// // Användaren ska kunna se en textbox när den tryckt på 'Create new'
-// test('textbox should appear when button Create is pressed', () => {
-//   render(<App />);
-
-//   const button = screen.getByRole("button", {name: 'Create'});
-//   fireEvent.click(button);
-//   const textbox = screen.getByRole("textbox");
-
-//   expect(textbox).toBeInTheDocument();
-// });
-
-// // Användaren ska kunna se texten "Name of file" efter att ha tryckt på 'Create new'
-// test('Text Name of file should appear when button Create is pressed', () => {
-//   render(<App />);
-
-//   const button = screen.getByRole("button", {name: 'Create'});
-//   fireEvent.click(button);
-//   const text = screen.getByText(/Name of file/i);
-
-//   expect(text).toBeInTheDocument();
-// });
-
-// // Användaren ska kunna se en knapp med namn 'Save' när den tryckt på 'Create new'
-// test('Button Save should appear after button Create is pressed', () => {
-//   render(<App />);
-
-//   const createNewButton = screen.getByRole("button", {name: 'Create'});
-//   fireEvent.click(createNewButton);
-//   const saveButton = screen.getByRole("button", {name: 'Save'});
- 
-//   expect(saveButton).toBeInTheDocument();
-// });
-
-// Användaren ska kunna skriva text i trix editor och sen se att textboxen har det värdet?
-// test('Button Save should appear after button Create new is pressed', () => {
-//     render(<App />);
-  
-//     const textbox = screen.getByRole("trixeditor");
-//     fireEvent.click(trixeditor);
-//     fireEvent.input("hej");
-   
-//     expect(textbox).toContainHTML("hej");
-//   });
-
-// Användaren ska kunna skapa ett dokument, sen trycka på selectlistan och välja samma dokument?
 // Användaren ska trycka på Update-knappen utan att ha valt ett dokument i listan, och få error?

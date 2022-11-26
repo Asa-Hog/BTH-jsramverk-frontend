@@ -34,7 +34,7 @@ export default function Login({setToken, setCurrentUser}) {
         <div className="loginDiv">
             <div className = "loginTitle">
                 Text Editor
-                <p className = "loginSubTitle">a real-time collaborative document editor</p>
+                <p className = "loginSubTitle">a real-time collaborative document and code editor</p>
             </div>
 
 
@@ -44,7 +44,7 @@ export default function Login({setToken, setCurrentUser}) {
                 <label className="loginLabel" htmlFor="email" >Email</label>
                 <input id = "email" className = "button loginbutton" type = "email" name = "email" onChange = { changeHandler } required/>
                 <label htmlFor="pwd" className="loginLabel">Password</label>
-                <input id = "pwd" className = "button loginbutton" type = "password" name = "password"  onChange = { changeHandler } />
+                <input id = "pwd" className = "button loginbutton" type = "password" name = "password" onChange = { changeHandler } />
 
                 <div className="loginButtonsDiv">
                     <button className = "button passwordButton" onClick = { login }> Log in </button>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import ReactDOM from 'react'; ////////react-dom?
 import { TrixEditor } from "react-trix";
 import "trix/dist/trix.css";
 import { io } from "socket.io-client";
@@ -30,6 +31,7 @@ const Editor = () => {
     const [codeResult, setCodeResult] = useState('');
     const [editorModel, setEditorModel] = useState("");
     const [valueChange, setValueChange] = useState('');
+    const [comments, setComments] = useState([]);
 
     // Hämta alla dokument
     useEffect(() => {
@@ -113,6 +115,18 @@ const Editor = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentDoc]); // Gör en emit om INNEHÅLLET i currentDoc ändras
 
+
+    // useEffect(() => {
+    //     let TrixEditor = document.getElementById("trixEditorContent");
+    //     //Lägg till bakgrundsfärg till trix editorns attribut
+    //     TrixEditor.config.textAttributes.foregroundColor = {
+    //         // TrixEditor.foregroundColor = {
+    //         styleProperty: "color",
+    //         inheritable: 1
+    //     }
+    // });
+
+
     const editorDidMount = (editor) => {
         const editorModel = editor.getModel();
 
@@ -125,24 +139,37 @@ const Editor = () => {
             if (docId !== "-99" && docs[docId]) {
                 let doc = docs[docId];
                 let docType = doc.docType;
+                let comments = doc.comments;
+                console.log(comments);
 
                 if (docType === "text") {
                     hideCodeDiv();
                     showTrixEditor();
 
                     let element = document.querySelector("trix-editor");
+
                     if (element) {
                         updateCurrentDocOnChange = triggerChange;
                         element.value = "";
                         element.editor.setSelectedRange([0, 0]); //
                         updateCurrentDocOnChange = triggerChange;
                         element.editor.insertHTML(content);
+
+                        if (comments.length === 0) {
+                            document.getElementsByClassName("commentsDiv")[0].style.display = "none";
+                            document.getElementsByClassName("trix-editor")[0].style.width = "87.5vw";
+                        } else {
+                            // Show div on the side
+                            document.getElementsByClassName("trix-editor")[0].style.width = "60vw";
+                            document.getElementsByClassName("commentsDiv")[0].style.display = "block";
+                        }
                     }
                 } 
 
                 if (docType === "code") {
                     hideTrixEditor();
                     showCodeDiv();
+                    document.getElementsByClassName("commentsDiv")[0].style.display = "none";
 
                     // Inget skrivs ut i kod-editorn härifrån, utan innehållet där sätts efter vad värdet på variabeln data är
 
@@ -188,6 +215,7 @@ const Editor = () => {
             setData(doc.html);
             setCodeData(doc.html); ////
             setDocType(doc.docType);
+            setComments(doc.comments);
         }
      };
 
@@ -391,8 +419,46 @@ const Editor = () => {
         setCodeResult(decodedResult);
     };
 
-    function comment() {
-        console.log("comment");
+    async function comment() {
+        let element = document.querySelector("trix-editor");
+
+            if (element) {
+                // Plocka upp start och slut pos från det som är markerat i texten
+                let markedText = element.editor.getSelectedRange()
+
+                // Markera först texten - tryck sedan på comment
+                if (markedText[0] === markedText[1]) {
+                    alert("Please mark the text you want to comment - then press Comment.");
+                } else {
+                    // Ange kommentaren
+                    let newCommentText = prompt("Add comment");
+                    let newComment = {"range": markedText, "commentText": newCommentText, "createdBy": currentUser};
+
+
+                    // Skapa nytt obj (copy, som är kopia av currentDoc)
+                    const copy = Object.assign({}, currentDoc);
+
+
+
+                    let currentComments = currentDoc.comments;
+                    let newComments = currentComments.push(newComment);
+                    console.log(currentComments); // Rätt
+                    // console.log(newComments);
+
+
+                    copy.comments = currentComments;
+
+                    console.log(copy);
+
+                    // Spara kommentaren till databasen
+                    let res = await docsModel.update(copy);
+                    console.log(res);
+
+                }
+            }
+        // var editor = element.editor
+        // var length = editor.getDocument().toString().length
+        // editor.setSelectedRange(length - 1)
     }
 
     const printText = useReactToPrint(
@@ -468,8 +534,8 @@ const Editor = () => {
                 <button className = "button trixButton" onClick = {()=> code() }> Code </button>
 
                 <button className = "button trixButton" onClick = {()=> logout() }> Log out </button>
-
             </trix-toolbar>
+
             <form className = "saveForm" id = "saveForm"  style = {{ display: "none" }}> Name of file:
                 
                 <input className = "button" id = "fileName" type = "text" required >
@@ -479,11 +545,32 @@ const Editor = () => {
 
                 <button className = "button" onClick = { (event) => { exitCreateDoc(event); } }> Exit </button>
             </form>
-            <TrixEditor id = "trixEditorContent" className = "trix-editor" toolbar = "trix-toolbar" ref={textRef}
-            onChange = { handleChange }
-            // onChange={props.change} // value = { data } // input = 'react-trix-editor'
-            // autoFocus={true} // default={props.default}
-            />
+
+
+
+
+            <div className = "textDiv">
+                <TrixEditor id = "trixEditorContent" className = "trix-editor" style = {{ width: "100vw" }} toolbar = "trix-toolbar" ref = { textRef }
+                onChange = { handleChange }
+                // onChange={props.change} // value = { data } // input = 'react-trix-editor'
+                // autoFocus={true} // default={props.default}
+                />
+
+                <div className = "commentsDiv" style = {{ display: "none" }} > Comments
+                {/* { comments ? */}
+                    {/* <div> */}
+                        {/* <div style = {{ display: "inline-block" }} className="commentDiv">gre</div> */}
+                        {
+                            comments.map((comment) => <div className="commentDiv"> {
+                                `By ${comment.createdBy}: \n\n${comment.commentText}`} </div>)
+                        }
+                    {/* </div> */}
+                    {/* : */}
+                    {/* <h3>No comments</h3> */}
+                    {/* } */}
+                </div>
+            </div>
+
 
             <div id = "codeDiv" className = "codeDiv" style = {{ display: "none" }} >
                 <div className = "codeEditorDiv">
@@ -506,6 +593,7 @@ const Editor = () => {
                         />
                     </div>
                 </div>
+
                 <button className = "button trixButton executeButton" onClick = {()=> execute() }> Execute </button>
                 <div className = "resultTermialDiv">
                     <div className = "codeTop"> Result terminal </div>

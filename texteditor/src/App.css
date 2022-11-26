@@ -71,16 +71,7 @@ body {
   /* margin: 200px; */
 /* } */
 
-.trix-editor {
-  text-align: justify;
-  background-color: #F5F5F5;
-  height: 87vh;
-  width: 85.8vw;
-  padding: 50px;
-  border: 70px solid lightgray;
-  border-top: 25px solid lightgray;
-  border-bottom: 30px solid lightgray;
-}
+
 
 trix-toolbar {
     min-height: 150px;
@@ -216,6 +207,48 @@ trix-button-row {
 .usersP {
   display: block;
   background-color: #F5F5F5;
+}
+
+.textDiv {
+
+  background-color: lightgray;
+  border: 3px solid green;
+    border: 70px solid lightgray;
+  border-top: 25px solid lightgray;
+  border-bottom: 30px solid lightgray;
+  display: flex;
+}
+
+.trix-editor {
+  text-align: justify;
+  background-color: #F5F5F5;
+  height: 87vh;
+  /* width: 85.8vw; */
+  padding: 50px;
+  /* border: 3px solid red; */
+  min-width: 65vw;
+  flex: 3;
+
+}
+
+.commentsDiv {
+  padding: 50px;
+  background-color: #F5F5F5;
+
+  flex: 1;
+  /* border: 3px solid black; */
+  border-left: 25px solid lightgray;
+  border-radius: 4px;
+}
+
+.commentDiv {
+  border: 1px solid #018A61;
+  background-color: #018A61;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  margin-top: 20px;
+  padding: 10px;
+  font-size: 16px;
 }
 
 .codeDiv {

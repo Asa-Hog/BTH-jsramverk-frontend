@@ -210,12 +210,11 @@ trix-button-row {
 }
 
 .textDiv {
-
   background-color: lightgray;
   border: 3px solid green;
-    border: 70px solid lightgray;
+  border: 70px solid lightgray;
   border-top: 25px solid lightgray;
-  border-bottom: 30px solid lightgray;
+  border-bottom: 25px solid lightgray;
   display: flex;
 }
 
@@ -227,7 +226,7 @@ trix-button-row {
   padding: 50px;
   /* border: 3px solid red; */
   min-width: 65vw;
-  flex: 3;
+  /* flex: 3; */
 
 }
 
@@ -235,8 +234,7 @@ trix-button-row {
   padding: 50px;
   background-color: #F5F5F5;
 
-  flex: 1;
-  /* border: 3px solid black; */
+  /* flex: 1; */
   border-left: 25px solid lightgray;
   border-radius: 4px;
 }
@@ -257,6 +255,7 @@ trix-button-row {
   height: 88vh;
   padding: 20px;
   padding-top: 40px;
+  padding-top: 0;
   padding-left: 70px;
   padding-right: 70px;
 }
@@ -300,4 +299,8 @@ font-size: 20px;
 .executeButton {
   margin-top: 20px;
   margin-bottom: 20px;
+}
+
+.red {
+  color:#F00;
 }

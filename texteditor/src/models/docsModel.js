@@ -62,9 +62,9 @@ const docsModel = {
             }
         );
 
-        // const result = await response.json();
+        const result = await response.json();
 
-        return response;
+        return result;
     },
 
     addEditor: async function addUser(doc, email) {

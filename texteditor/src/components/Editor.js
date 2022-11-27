@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import ReactDOM from 'react'; ////////react-dom?
+// import ReactDOM from 'react'; ////////react-dom?
 import { TrixEditor } from "react-trix";
 import "trix/dist/trix.css";
 import { io } from "socket.io-client";
@@ -65,9 +65,9 @@ const Editor = () => {
     useEffect(() => {
         setEditorContent(data, false);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [data]); //
+    }, [data, comments]); //
 
-    // Skriver ut innehållet i kod-editorn när data ändras
+    // Ändrar currentDoc när innehållet i kod-editorn ändras
     useEffect(() => {
         // setData(valueChange);
         currentDoc.html = valueChange;
@@ -115,18 +115,6 @@ const Editor = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentDoc]); // Gör en emit om INNEHÅLLET i currentDoc ändras
 
-
-    // useEffect(() => {
-    //     let TrixEditor = document.getElementById("trixEditorContent");
-    //     //Lägg till bakgrundsfärg till trix editorns attribut
-    //     TrixEditor.config.textAttributes.foregroundColor = {
-    //         // TrixEditor.foregroundColor = {
-    //         styleProperty: "color",
-    //         inheritable: 1
-    //     }
-    // });
-
-
     const editorDidMount = (editor) => {
         const editorModel = editor.getModel();
 
@@ -134,13 +122,15 @@ const Editor = () => {
     };
 
     async function setEditorContent(content, triggerChange) {
-        if (document.getElementById("selectDoc")) {
+
+        // if (document.getElementById("selectDoc")) { // Tidigare
+        if (document.getElementById("selectDoc") && docs) {
             let docId = document.getElementById("selectDoc").value; // 0, 1, 2
+
             if (docId !== "-99" && docs[docId]) {
                 let doc = docs[docId];
                 let docType = doc.docType;
                 let comments = doc.comments;
-                console.log(comments);
 
                 if (docType === "text") {
                     hideCodeDiv();
@@ -155,13 +145,39 @@ const Editor = () => {
                         updateCurrentDocOnChange = triggerChange;
                         element.editor.insertHTML(content);
 
+
+                        // element.config.textAttributes.red = { 
+                        //     style: { color: "red" },
+                        //   parser: function(element) {
+                        //       return element.style.color === "red"
+                        //   },
+                        //   inheritable: true
+                        //  }
+
+                        // element.config.textAttributes = 
+                        // bold: 
+                        //   tagName: "strong" 
+                        //   inheritable: true
+
+
                         if (comments.length === 0) {
                             document.getElementsByClassName("commentsDiv")[0].style.display = "none";
                             document.getElementsByClassName("trix-editor")[0].style.width = "87.5vw";
                         } else {
                             // Show div on the side
-                            document.getElementsByClassName("trix-editor")[0].style.width = "60vw";
+                            document.getElementsByClassName("textDiv")[0].style.flexDirection = "row";
                             document.getElementsByClassName("commentsDiv")[0].style.display = "block";
+                            // document.getElementsByClassName("commentsDiv")[0].innerHTML= "";
+                            document.getElementsByClassName("trix-editor")[0].style.width = "60vw";
+
+                            // Även texten ska få bakgrundsfärg
+                            for (let i = 0; i < comments.length; i++) {
+                                element.editor.setSelectedRange(comments[i].range)
+                                element.editor.activateAttribute("bold")
+                            }
+
+
+
                         }
                     }
                 } 
@@ -170,16 +186,7 @@ const Editor = () => {
                     hideTrixEditor();
                     showCodeDiv();
                     document.getElementsByClassName("commentsDiv")[0].style.display = "none";
-
                     // Inget skrivs ut i kod-editorn härifrån, utan innehållet där sätts efter vad värdet på variabeln data är
-
-                //     let element = document.getElementsByClassName("code-editor")[0];
-                //     if (element && editorModel) {
-                //         console.log("ga");
-                //         let value = editorModel.getValue();
-                //         console.log(value);
-                //         editorModel.setValue(content);
-                //     }
                 }
             }
         }
@@ -256,6 +263,7 @@ const Editor = () => {
     function code() {
         hideSaveForm();
         hideTrixEditor();
+        document.getElementsByClassName("commentsDiv")[0].style.display = "none";
         showCodeDiv();
         createReset();
         setDocType("code");
@@ -341,7 +349,7 @@ const Editor = () => {
 
         newDoc.name = newName;
         newDoc.docType = docType;
-        // console.log(newDoc);
+        newDoc.comments = [];
 
         if (newDoc.name === null || newDoc.name === "" || newDoc.name === undefined) {
             alert("Document must have a title");
@@ -357,8 +365,7 @@ const Editor = () => {
     };
 
     const update = async () => { 
-        /////////Obs! Kolla att allt fungerar efter if tillagd - borde göra
-        if (document.getElementById("selectDoc")) { ////
+        if (document.getElementById("selectDoc")) {
             // Hämta värde ur selectlistan. Om värdet är -99 har inget dokument valts
             let docId = document.getElementById("selectDoc").value; // 0, 1, 2
 
@@ -420,11 +427,14 @@ const Editor = () => {
     };
 
     async function comment() {
-        let element = document.querySelector("trix-editor");
+        if (currentDoc.docType === "code") {
+            alert("Comments only work for text documents.");
+        } else {
+            let element = document.querySelector("trix-editor");
 
             if (element) {
                 // Plocka upp start och slut pos från det som är markerat i texten
-                let markedText = element.editor.getSelectedRange()
+                let markedText = element.editor.getSelectedRange();
 
                 // Markera först texten - tryck sedan på comment
                 if (markedText[0] === markedText[1]) {
@@ -434,31 +444,33 @@ const Editor = () => {
                     let newCommentText = prompt("Add comment");
                     let newComment = {"range": markedText, "commentText": newCommentText, "createdBy": currentUser};
 
-
                     // Skapa nytt obj (copy, som är kopia av currentDoc)
                     const copy = Object.assign({}, currentDoc);
 
-
-
                     let currentComments = currentDoc.comments;
-                    let newComments = currentComments.push(newComment);
-                    console.log(currentComments); // Rätt
-                    // console.log(newComments);
+
+                // Jag behöver lägga till kommentarerna sorterade efter comment.range första pos
+                    currentComments.push(newComment);
+ 
+                    currentComments.sort(function(a, b) {
+                        return a.range[0] - b.range[0];
+                    });
+
+                    console.log(currentComments);
 
 
                     copy.comments = currentComments;
-
-                    console.log(copy);
-
+                    // console.log(copy);
                     // Spara kommentaren till databasen
                     let res = await docsModel.update(copy);
-                    console.log(res);
-
+                    // console.log(res);
                 }
             }
         // var editor = element.editor
         // var length = editor.getDocument().toString().length
         // editor.setSelectedRange(length - 1)
+        }
+
     }
 
     const printText = useReactToPrint(
@@ -502,7 +514,6 @@ const Editor = () => {
                 <select id = "selectDoc" className = " button trixButton" onChange = { handleSelectedDoc } >
                      <option value = "-99" key = "0"> Choose a document </option>
                    {docs.map((doc, index) => <option value = {index} key = {index}> {doc.name} </option>)}
-                    {/* {docs.map((doc, index) => <option value = {index} key = {index}> {doc} </option>)} */}
                 </select>
                 </>
                 :
@@ -524,7 +535,6 @@ const Editor = () => {
                 <h2>"Users not found"</h2>
                 }
 
-                {/* <button className = "button trixButton" onClick = {()=> generatePDF() }> Print </button> */}
                 <button className = "button trixButton" onClick = { handlePrint }> Print </button>
 
                 <button className = "button trixButton" onClick = {()=> comment() }> Comment </button>
@@ -547,27 +557,20 @@ const Editor = () => {
             </form>
 
 
-
-
-            <div className = "textDiv">
-                <TrixEditor id = "trixEditorContent" className = "trix-editor" style = {{ width: "100vw" }} toolbar = "trix-toolbar" ref = { textRef }
+            <div className = "textDiv"  style = {{ display: "flex", flexDirection: "column"}}>
+                <TrixEditor id = "trixEditorContent" className = "trix-editor" toolbar = "trix-toolbar" ref = { textRef }
                 onChange = { handleChange }
                 // onChange={props.change} // value = { data } // input = 'react-trix-editor'
-                // autoFocus={true} // default={props.default}
+                // autoFocus={true} 
+                // default={props.default}
+
                 />
 
-                <div className = "commentsDiv" style = {{ display: "none" }} > Comments
-                {/* { comments ? */}
-                    {/* <div> */}
-                        {/* <div style = {{ display: "inline-block" }} className="commentDiv">gre</div> */}
-                        {
-                            comments.map((comment) => <div className="commentDiv"> {
-                                `By ${comment.createdBy}: \n\n${comment.commentText}`} </div>)
-                        }
-                    {/* </div> */}
-                    {/* : */}
-                    {/* <h3>No comments</h3> */}
-                    {/* } */}
+                <div className = "commentsDiv" style = {{ display: "none"}} > Comments
+                    {
+                        comments.map((comment) => <div className="commentDiv"> {
+                            `By ${comment.createdBy}: \n\n${comment.commentText}`} </div>)
+                    }
                 </div>
             </div>
 
@@ -585,10 +588,8 @@ const Editor = () => {
                             height="30vh"
                             defaultLanguage="javascript"
                             theme="vs-dark"
-                            // defaultValue="let a = 3;\n let b = 4;\n console.log(a*b);"
                             onChange = { (value) => {handleChange(); setValueChange(value);} } // setCodeData(value); setData(value);
                             editorDidMount = { editorDidMount }
-                            // onMount = { editorDidMount }
                             value = { data }
                         />
                     </div>
@@ -611,21 +612,3 @@ const Editor = () => {
 } 
 
 export default Editor
-
-// Jag hade lite problem med att min markör hela tiden hoppade till slutet av min text i trixeditor i React när jag skrev i editorn efter att ha implementerat sockets. Det gjorde det svårt att ändra text "mitt i" ett textblock. Visade sig bero på att setEdihtorContent funktionen rensar editorn och lägger in nytt innehåll. Efter att ha pratat med @efo modifierade jag setEdhitorContent funktionen till följande (delar här om någon sitter med samma problem) vilket verkar fungera (markören "stannar" där den var): 
-
-// const cursorPos = useRef([]);
-
-// function setEdhitorContent(content: string, triggerChange: boolean) {
-//         let element = document.querySelector("trix-editor") as any | null;
-
-//         updateCurrentDocOnChange = triggerChange;
-//         // Get selected range (save the current cursor position)
-//         cursorPos.current = element.editor.getSelectedRange();
-//         element.value = "";
-//         element.editor.setSelectedRange([0, 0]);
-//         updateCurrentDocOnChange = triggerChange;
-//         element.editor.insertHTML(content);
-//         // Set selected range to the "old" cursor position
-//         element.editor.setSelectedRange(cursorPos.current);
-//     }

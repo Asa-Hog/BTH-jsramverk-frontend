@@ -49,7 +49,7 @@ const auth = {
         );
         const result = await response.json();
 
-        if (result) {
+        if (result && result.data.users) {
             let emailList = [];
             for (let i = 0; i < result.data.users.length; i++) {
                 emailList.push(result.data.users[i].email)

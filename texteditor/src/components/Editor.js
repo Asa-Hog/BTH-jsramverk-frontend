@@ -1,21 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
-// import ReactDOM from 'react'; ////////react-dom?
 import { TrixEditor } from "react-trix";
 import "trix/dist/trix.css";
 import { io } from "socket.io-client";
-// import ReactHtmlParser from 'react-html-parser';
-// import "trix";
 import docsModel from '../models/docsModel';
 import authModel from '../models/auth';
 import Login from "./Login";
 import { useReactToPrint } from 'react-to-print';
 import CodeEditor from "@monaco-editor/react";
-// let Buffer = require('buffer/').Buffer
 import { Buffer } from 'buffer';
 let sendToSocket = true;
+let noOfComments = 0;
 
 const Editor = () => {
     let updateCurrentDocOnChange;
+    const cursorPos = useRef([]);
     const textRef = useRef();
     const codeRef = useRef();
     const [data, setData] = useState('');
@@ -29,9 +27,12 @@ const Editor = () => {
     const [appUsers, setAppUsers] = useState([]);
     const [codeData, setCodeData] = useState('');
     const [codeResult, setCodeResult] = useState('');
+    const [codePrintResult, setCodePrintResult] = useState('');
     const [editorModel, setEditorModel] = useState("");
     const [valueChange, setValueChange] = useState('');
     const [comments, setComments] = useState([]);
+    const [docCreated, setDocCreated] = useState("");
+    const [commentCreated, setCommentCreated] = useState("");
 
     // Hämta alla dokument
     useEffect(() => {
@@ -39,7 +40,7 @@ const Editor = () => {
             const allDocs = await docsModel.getAllDocs(token);
             setDocs(allDocs);
         })();
-    }, [currentDoc, token]); //Laddas om när currentDoc ändras (Om man vill hämta dok från andra browsers?)
+    }, [currentDoc, token, docCreated, commentCreated]); // Laddas om när currentDoc ändras (Om man vill hämta dok från andra browsers)
 
     // Skapa en socket mellan frontend och backend - om selectedDoc ändras - till nya dokumentet
     useEffect(() => {
@@ -65,11 +66,10 @@ const Editor = () => {
     useEffect(() => {
         setEditorContent(data, false);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [data, comments]); //
+    }, [data]); //
 
     // Ändrar currentDoc när innehållet i kod-editorn ändras
     useEffect(() => {
-        // setData(valueChange);
         currentDoc.html = valueChange;
 
         // När det gjorts ändring i code-editorn skickar jag datan via sockets
@@ -115,6 +115,23 @@ const Editor = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentDoc]); // Gör en emit om INNEHÅLLET i currentDoc ändras
 
+    // Gör så att dokumentet rensas då jag försöker skapa ett nytt
+    useEffect(() => {
+        if (currentDoc.html === "" || currentDoc.html === undefined) {
+            if (document.getElementsByClassName("trix-editor")[0]) {
+                document.getElementsByClassName("trix-editor")[0].value = "";
+                document.getElementsByClassName("commentsDiv")[0].style.display = "none";
+                document.getElementsByClassName("trix-editor")[0].style.width = "87.5vw";
+            }
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentDoc]);
+
+    useEffect(() => {
+        setEditorContent(currentDoc.html, false);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [commentCreated]);
+
     const editorDidMount = (editor) => {
         const editorModel = editor.getModel();
 
@@ -122,8 +139,6 @@ const Editor = () => {
     };
 
     async function setEditorContent(content, triggerChange) {
-
-        // if (document.getElementById("selectDoc")) { // Tidigare
         if (document.getElementById("selectDoc") && docs) {
             let docId = document.getElementById("selectDoc").value; // 0, 1, 2
 
@@ -140,25 +155,15 @@ const Editor = () => {
 
                     if (element) {
                         updateCurrentDocOnChange = triggerChange;
+                        // Get selected range (save the current cursor position)
+                        cursorPos.current = element.editor.getSelectedRange();
                         element.value = "";
-                        element.editor.setSelectedRange([0, 0]); //
+                        element.editor.setSelectedRange([0, 0]);
                         updateCurrentDocOnChange = triggerChange;
-                        element.editor.insertHTML(content);
-
-
-                        // element.config.textAttributes.red = { 
-                        //     style: { color: "red" },
-                        //   parser: function(element) {
-                        //       return element.style.color === "red"
-                        //   },
-                        //   inheritable: true
-                        //  }
-
-                        // element.config.textAttributes = 
-                        // bold: 
-                        //   tagName: "strong" 
-                        //   inheritable: true
-
+                        // element.editor.insertHTML(content);
+                        element.value = content;
+                        // Set selected range to the "old" cursor position
+                        element.editor.setSelectedRange(cursorPos.current);
 
                         if (comments.length === 0) {
                             document.getElementsByClassName("commentsDiv")[0].style.display = "none";
@@ -167,17 +172,28 @@ const Editor = () => {
                             // Show div on the side
                             document.getElementsByClassName("textDiv")[0].style.flexDirection = "row";
                             document.getElementsByClassName("commentsDiv")[0].style.display = "block";
-                            // document.getElementsByClassName("commentsDiv")[0].innerHTML= "";
                             document.getElementsByClassName("trix-editor")[0].style.width = "60vw";
 
-                            // Även texten ska få bakgrundsfärg
+                            // Markera texten som kommentaren avser
                             for (let i = 0; i < comments.length; i++) {
-                                element.editor.setSelectedRange(comments[i].range)
-                                element.editor.activateAttribute("bold")
+                                // Get selected range (save the current cursor position)
+                                cursorPos.current = element.editor.getSelectedRange();
+                                element.editor.setSelectedRange(comments[i].range);
+                                element.editor.activateAttribute("italic");
+                                element.editor.activateAttribute("bold");
+                                // Set selected range to the "old" cursor position
+                                element.editor.setSelectedRange(cursorPos.current);
                             }
+                            let length = element.editor.getDocument().toString().length;
 
+                            // Get selected range (save the current cursor position)
+                            cursorPos.current = element.editor.getSelectedRange();
 
-
+                            element.editor.setSelectedRange(length - 1);
+                            element.editor.deactivateAttribute("italic");
+                            element.editor.deactivateAttribute("bold");
+                            // Set selected range to the "old" cursor position
+                            element.editor.setSelectedRange(cursorPos.current);
                         }
                     }
                 } 
@@ -196,7 +212,8 @@ const Editor = () => {
         let element = document.getElementById("code-terminal");
         if (element) {
             element.value = "";
-            element.innerHTML = codeResult;
+            let codeArray = codeResult.trim().split("\n");
+            setCodePrintResult(codeArray)
         }
     };
 
@@ -220,10 +237,11 @@ const Editor = () => {
             setSelectedDoc(doc["_id"]); // 6140s3f01sd - Ett id  1 currentDoc och selectedDoc sätts
             setCurrentDoc(doc); // Ett objekt
             setData(doc.html);
-            setCodeData(doc.html); ////
+            setCodeData(doc.html);
             setDocType(doc.docType);
             setComments(doc.comments);
         }
+        hideSaveForm();
      };
 
     const resetDb = async () => {
@@ -324,15 +342,14 @@ const Editor = () => {
     };
 
     const createReset = () => {
-        /////////Obs! Kolla att allt fungerar efter if tillagd - borde göra
         if (document.getElementById("selectDoc")) {
             document.getElementById("selectDoc").value = "-99";
+            setEditorContent("", false);
             setCurrentDoc({});
             setSelectedDoc({});
             setData("");
-            setCodeData(""); ////
+            setCodeData("");
         }
-
     };
 
     const create = async (event) => {
@@ -350,18 +367,24 @@ const Editor = () => {
         newDoc.name = newName;
         newDoc.docType = docType;
         newDoc.comments = [];
+        newDoc.html = currentDoc.html;
 
         if (newDoc.name === null || newDoc.name === "" || newDoc.name === undefined) {
-            alert("Document must have a title");
+            alert("Document must have a title.");
         } else {
-            newDoc.owner = currentUser;
-            newDoc.allowedUsers = [currentUser];
+            if (newDoc.html === "" || newDoc.html === undefined) {
+                alert("Please add new content.");
+            } 
+            else {
+                newDoc.owner = currentUser;
+                newDoc.allowedUsers = [currentUser];
 
-            await docsModel.create(newDoc);
-            hideSaveForm();
+                await docsModel.create(newDoc);
+                hideSaveForm();
+            }
         }
-
-        setEditorContent("", false);
+        // Gör att dokumentlistan uppdateras varje gång det skapas ett nytt dokument
+        setDocCreated(newDoc);
     };
 
     const update = async () => { 
@@ -426,53 +449,6 @@ const Editor = () => {
         setCodeResult(decodedResult);
     };
 
-    async function comment() {
-        if (currentDoc.docType === "code") {
-            alert("Comments only work for text documents.");
-        } else {
-            let element = document.querySelector("trix-editor");
-
-            if (element) {
-                // Plocka upp start och slut pos från det som är markerat i texten
-                let markedText = element.editor.getSelectedRange();
-
-                // Markera först texten - tryck sedan på comment
-                if (markedText[0] === markedText[1]) {
-                    alert("Please mark the text you want to comment - then press Comment.");
-                } else {
-                    // Ange kommentaren
-                    let newCommentText = prompt("Add comment");
-                    let newComment = {"range": markedText, "commentText": newCommentText, "createdBy": currentUser};
-
-                    // Skapa nytt obj (copy, som är kopia av currentDoc)
-                    const copy = Object.assign({}, currentDoc);
-
-                    let currentComments = currentDoc.comments;
-
-                // Jag behöver lägga till kommentarerna sorterade efter comment.range första pos
-                    currentComments.push(newComment);
- 
-                    currentComments.sort(function(a, b) {
-                        return a.range[0] - b.range[0];
-                    });
-
-                    console.log(currentComments);
-
-
-                    copy.comments = currentComments;
-                    // console.log(copy);
-                    // Spara kommentaren till databasen
-                    let res = await docsModel.update(copy);
-                    // console.log(res);
-                }
-            }
-        // var editor = element.editor
-        // var length = editor.getDocument().toString().length
-        // editor.setSelectedRange(length - 1)
-        }
-
-    }
-
     const printText = useReactToPrint(
         {
         content: () => textRef.current,
@@ -497,27 +473,102 @@ const Editor = () => {
         }
     }
 
+    async function comment() {
+        if (currentDoc.docType === "code") {
+            alert("Comments only work for text documents.");
+        } else {
+            let element = document.querySelector("trix-editor");
+
+            if (element) {
+                // Plocka upp start och slut pos från det som är markerat i texten
+                let markedText = element.editor.getSelectedRange();
+
+                // Markera först texten - tryck sedan på comment
+                if (markedText[0] === markedText[1]) {
+                    alert("Please mark the text you want to comment - then press Comment.");
+                } else {
+                    // Ange kommentaren
+                    let newCommentText = prompt("Add comment:");
+
+                    if (newCommentText) {
+                        let newComment = {"range": markedText, "commentText": newCommentText, "createdBy": currentUser};
+
+                        // Skapa nytt obj (copy, som är kopia av currentDoc)
+                        const copy = Object.assign({}, currentDoc);
+
+                        let currentComments = currentDoc.comments;
+
+                        currentComments.push(newComment);
+
+                        // Sortera kommentarerna efter comment.range första pos
+                        currentComments.sort(function(a, b) {
+                            return a.range[0] - b.range[0];
+                        });
+
+                        copy.comments = currentComments;
+                        // Spara kommentaren till databasen
+                        await docsModel.update(copy);
+                    }
+                } 
+            }
+
+            noOfComments++;
+            setCommentCreated(noOfComments);
+        }
+    }
+
+    async function remove(comment) {
+        let commentRange = [];
+        let newCommentArray = [];
+        let remove = window.confirm("Remove comment?");
+
+        if (remove) {
+            const commentDivText = comment.target.innerHTML.split("\n\n");
+
+            // Ger kommentarens range, samt en array utan den borttagna kommentaren
+            for (let i = 0; i < currentDoc.comments.length; i++) {
+                if (currentDoc.comments[i].commentText === commentDivText[1].trim()) {
+                    commentRange = currentDoc.comments[i].range;
+                } else {
+                    newCommentArray.push(currentDoc.comments[i]);
+                }
+            }
+
+            // Skriver över currentDocs kommentarsarray
+            currentDoc.comments = newCommentArray;
+
+            await docsModel.update(currentDoc); // Spara i databasen
+
+            setCurrentDoc(currentDoc);
+
+            // Ta bort kommentarens markering
+            let element = document.querySelector("trix-editor");
+
+            element.editor.setSelectedRange(commentRange);
+            element.editor.deactivateAttribute("italic");
+            element.editor.deactivateAttribute("bold");
+        }
+    }
+
     return (
         <div className = "editor">
             { token ?
             <>
-            
             <trix-toolbar id = "trix-toolbar">
-            {/* <trix-toolbar className="ordToolbar"></trix-toolbar> */}
 
-                <button className = "button trixButton" onClick = {()=> resetDb() }> Reset </button>
+                <button className = "button trixButton" onClick = { resetDb }> Reset </button>
 
-                <button className = "button trixButton"  onClick = {(event)=> {showSaveForm(event); createReset();} }> Create </button>
+                <button className = "button trixButton" onClick = {(event)=> { showSaveForm(event); createReset();} }> Create </button>
 
                 { docs ?
                     <>
                 <select id = "selectDoc" className = " button trixButton" onChange = { handleSelectedDoc } >
-                     <option value = "-99" key = "0"> Choose a document </option>
+                     <option value = "-99" key = "0"> Choose document </option>
                    {docs.map((doc, index) => <option value = {index} key = {index}> {doc.name} </option>)}
                 </select>
                 </>
-                :
-                <h2>"Docs not found"</h2>
+                 : 
+                  <h3>"Docs not found"</h3>
                 }
 
                 <button className = "button trixButton" onClick = {()=> update() }> Update </button>
@@ -537,13 +588,13 @@ const Editor = () => {
 
                 <button className = "button trixButton" onClick = { handlePrint }> Print </button>
 
-                <button className = "button trixButton" onClick = {()=> comment() }> Comment </button>
+                <button className = "button trixButton" onClick = { comment }> Comment </button>
 
-                <button className = "button trixButton" onClick = {()=> invite() }> Invite </button>
+                <button className = "button trixButton" onClick = { invite }> Invite </button>
 
-                <button className = "button trixButton" onClick = {()=> code() }> Code </button>
+                <button className = "button trixButton" onClick = { code }> Code </button>
 
-                <button className = "button trixButton" onClick = {()=> logout() }> Log out </button>
+                <button className = "button trixButton" onClick = { logout }> Log out </button>
             </trix-toolbar>
 
             <form className = "saveForm" id = "saveForm"  style = {{ display: "none" }}> Name of file:
@@ -556,24 +607,18 @@ const Editor = () => {
                 <button className = "button" onClick = { (event) => { exitCreateDoc(event); } }> Exit </button>
             </form>
 
-
-            <div className = "textDiv"  style = {{ display: "flex", flexDirection: "column"}}>
-                <TrixEditor id = "trixEditorContent" className = "trix-editor" toolbar = "trix-toolbar" ref = { textRef }
+            <div className = "textDiv" ref = { textRef } style = {{ display: "flex", flexDirection: "column"}}>
+                <TrixEditor id = "trixEditorContent" className = "trix-editor" toolbar = "trix-toolbar" 
                 onChange = { handleChange }
-                // onChange={props.change} // value = { data } // input = 'react-trix-editor'
-                // autoFocus={true} 
-                // default={props.default}
-
+                // autoFocus={true}
                 />
-
-                <div className = "commentsDiv" style = {{ display: "none"}} > Comments
+                <div className = "commentsDiv" style = {{ display: "none", fontStyle: "italic", fontWeight: "bold" }} > Comments
                     {
-                        comments.map((comment) => <div className="commentDiv"> {
-                            `By ${comment.createdBy}: \n\n${comment.commentText}`} </div>)
+                        comments.map((comment, index) => <p onClick = { (comment, index) => { remove(comment, index) } } className="commentDiv" key = {index}> {
+                            `By ${comment.createdBy}:\n\n${comment.commentText}`} </p>)
                     }
                 </div>
             </div>
-
 
             <div id = "codeDiv" className = "codeDiv" style = {{ display: "none" }} >
                 <div className = "codeEditorDiv">
@@ -581,14 +626,14 @@ const Editor = () => {
                         JS code editor
                     </div>
                     <div ref = { codeRef }>
-                        <CodeEditor
-                        aria-describedby="code-id-1"
-                            id = "code-editor" 
+                        <CodeEditor 
+                            aria-describedby="code-id-1"
+                            id = "code-editor"
                             className = "code-editor"
                             height="30vh"
                             defaultLanguage="javascript"
                             theme="vs-dark"
-                            onChange = { (value) => {handleChange(); setValueChange(value);} } // setCodeData(value); setData(value);
+                            onChange = { (value) => {handleChange(); setValueChange(value); setCodeData(value);} }
                             editorDidMount = { editorDidMount }
                             value = { data }
                         />
@@ -598,7 +643,18 @@ const Editor = () => {
                 <button className = "button trixButton executeButton" onClick = {()=> execute() }> Execute </button>
                 <div className = "resultTermialDiv">
                     <div className = "codeTop"> Result terminal </div>
-                    <div id = "code-terminal" className = "code code-terminal"> </div>
+                    <div id = "code-terminal" className = "code code-terminal">
+                    { codePrintResult ?
+                    <>
+                    {codePrintResult.map((res, index) => <div className = "codeRes" value = {index} key = {index}> {res}
+                     </div>)}
+                     </>
+                     :
+                     <div className = "codeText">Result shows here.</div>
+                    }
+                </div>
+
+
                 </div>
                 <button className = "button trixButton executeButton" onClick = {()=> text() }> Return to text mode </button>
             </div>

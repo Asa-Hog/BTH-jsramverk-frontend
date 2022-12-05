@@ -555,7 +555,7 @@ const Editor = () => {
             <>
             <trix-toolbar id = "trix-toolbar">
 
-                <button className = "button trixButton" onClick = { resetDb }> Reset </button>
+                {/* <button className = "button trixButton" onClick = { resetDb }> Reset </button> */}
 
                 <button className = "button trixButton" onClick = {(event)=> { showSaveForm(event); createReset();} }> Create </button>
 

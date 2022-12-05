@@ -238,7 +238,7 @@ color: #F5F5F5;
 }
 
 .commentDiv {
-  border: 1px solid #018A61;
+  border: 4px solid #018A61;
   background-color: #018A61;
   border-radius: 4px;
   margin-bottom: 20px;
@@ -249,8 +249,9 @@ color: #F5F5F5;
   font-weight: 400;
 }
 .commentDiv:hover {
-  border: 2px solid #018A61;
-  /* background-color: #018A61; */
+  border: 4px dotted #013E2C;
+  /* color: #F5F5F5; */
+  /* background-color: #013E2C; */
 
 }
 

@@ -100,7 +100,7 @@ const Editor = () => {
                 sendToSocket = false;
                 setEditorContent(doc.html, false);
 
-                setData(doc.html); /////
+                setData(doc.html); ///
             });
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -420,7 +420,6 @@ const Editor = () => {
     };
 
     async function sendEmail(email) {
-        //// Kolla att inget förstörts
         let res = await authModel.invite(email);
 
         if (res.status === 200 ) {
@@ -562,9 +561,9 @@ const Editor = () => {
 
                 { docs ?
                     <>
-                <select id = "selectDoc" className = " button trixButton" onChange = { handleSelectedDoc } >
+                <select id = "selectDoc" className = " button trixButton" data-testid = "select" onChange = { handleSelectedDoc } >
                      <option value = "-99" key = "0"> Choose document </option>
-                   {docs.map((doc, index) => <option value = {index} key = {index}> {doc.name} </option>)}
+                   {docs.map((doc, index) => <option value = {index} key = {index} data-testid = "select-option"> {doc.name} </option>)}
                 </select>
                 </>
                  : 
@@ -626,8 +625,8 @@ const Editor = () => {
                         JS code editor
                     </div>
                     <div ref = { codeRef }>
-                        <CodeEditor 
-                            aria-describedby="code-id-1"
+                        <CodeEditor
+                            data-testid="ces"
                             id = "code-editor"
                             className = "code-editor"
                             height="30vh"
